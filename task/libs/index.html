@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Geonames API</title>
+    <meta name="author" content="Kierath Dhugga">
+    <meta name="description" content="AJAX/PHP/CURL/JSON example to call Geonames API">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <h1>GeoNames API Tester</h1>
+    <h2>APIs</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>API Name</th>
+                <th>API Description</th>
+                <th>Run API Call</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <!-- 1. API - FIND NEARBY PLACE -->
+                <td>1. Nearby Place Name</td>
+                <td>Returns the closest populated place<br>
+                    <label>Latitude: <input type="text" id="nearby-lat" placeholder="e.g. 48.8566"></label><br>
+                    <label>Longitude: <input type="text" id="nearby-lng" placeholder="e.g. 2.3522"></label>
+                </td>
+                <td>
+                    <button id="nearby-btn">Run</button>
+                </td>
+                <td>
+                    <div id="nearby-result" class="api-output"></div>
+                </td>
+            </tr>
+
+            <tr>
+                <!-- 2. API - GET COUNTRY INFO -->
+                <td>2. Get Ocean or Sea</td>
+                <td>The name of the ocean/sea at a coordinate<br>
+                    <label>Latitude: <input type="text" id="ocean-lat" placeholder="e.g. 48.8566"></label><br>
+                    <label>Longitude: <input type="text" id="ocean-lng" placeholder="e.g. 2.3522"></label>
+                </td>
+                <td>
+                    <button id="ocean-btn">Run</button>
+                </td>
+            </tr>
+
+            <tr>
+                <!-- //3. API - TIMEZONE -->
+                <td>3. Weather</td>
+                <td>Returns current weather data for a nearby station<br>
+                    <label>Latitude: <input type="text" id="weather-lat" placeholder="e.g. 48.8566"></label><br>
+                    <label>Longitude: <input type="text" id="weather-lng" placeholder="e.g. 2.3522"></label><br>
+                    <label>Radius(km): <input type="number" id="weather-radius" value="10" min="0"></label>
+                </td>
+                <td>
+                    <button id="weather-btn">Run</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script src="./js/jquery-3.7.1.min.js"></script>
+    <script src="./js/script.js"></script>
+</body>
+
+</html>
