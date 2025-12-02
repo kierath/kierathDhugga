@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Geonames API Tester</title>
+    <meta name="author" content="Kierath Dhugga">
+    <meta name="description" content="AJAX/PHP/CURL/JSON example to call Geonames API">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <h1>GeoNames API Tester</h1>
+    <h2>APIs</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>API Name</th>
+                <th>API Description</th>
+                <th>Run API Call</th>
+                <th>Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <!-- 1. API - FIND NEARBY PLACE -->
+                <td>1. Nearby Place</td>
+                <td>Get the closest town or city<br>
+                    <label>Latitude: <input type="number" id="nearby-lat" min="-90.0" max="90.0"
+                            step="0.01"></label><br>
+                    <label>Longitude: <input type="number" id="nearby-lng" min="-180.0" max="180.0" step="0.01"></label>
+                </td>
+                <td>
+                    <button id="nearby-btn">Go</button>
+                </td>
+                <td>
+                    <div id="nearby-result" class="api-output"></div>
+                </td>
+            </tr>
+
+            <tr>
+                <!-- 2. API - OCEAN INFO -->
+                <td>2. Ocean/Sea Name</td>
+                <td>What's the water body here?<br>
+                    <label>Latitude: <input type="number" id="ocean-lat" min="-90.0" max="90.0" step="0.01"></label><br>
+                    <label>Longitude: <input type="number" id="ocean-lng" min="-180.0" max="180.0" step="0.01"></label>
+                </td>
+                <td>
+                    <button id="ocean-btn">Go</button>
+                </td>
+                <td>
+                    <div id="ocean-result" class="api-output"></div>
+                </td>
+            </tr>
+
+            <tr>
+                <!-- //3. API - WEATHER -->
+                <td>3. Weather Conditions</td>
+                <td>Grabs weather data from nearby stations<br>
+                    <label>North: <input type="number" id="weather-north" min="-90.0" max="90.0"
+                            step="0.01"></label><br>
+                    <label>South: <input type="number" id="weather-south" min="-90.0" max="90.0"
+                            step="0.01"></label><br>
+                    <label>East: <input type="number" id="weather-east" min="-180.0" max="180.0"
+                            step="0.01"></label><br>
+                    <label>West: <input type="number" id="weather-west" min="-180.0" max="180.0" step="0.01"></label>
+                </td>
+                <td>
+                    <button id="weather-btn">Go</button>
+                </td>
+                <td>
+                    <div id="weather-result" class="api-output"></div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Some test examples I used from testing using https://www.latlong.net/-->
+    <h4>Nearby Place Tests:</h4>
+    <ul>
+        <li>Latitude: 52.477, Longitude = -1.9 - Birmingham, United Kingdom</li>
+        <li>Latitude: 28.614, Longitude = 77.211 - New Delhi, India</li>
+        <li>Latitude: 21.157, Longitude = -86.857 - Cancun, Mexico</li>
+    </ul>
+
+
+    <h4>Ocean/Sea Tests:</h4>
+    <ul>
+        <li>Latitude: 0, Longitude: 0 = South Atlantic Ocean</li>
+        <li>Latitude: 0, Longitude: 80 = Indian Ocean</li>
+        <li>Latitude: 10.0, Longitude: 60.0 - Arabian Sea</li>
+    </ul>
+
+    <h4>Weather Tests:</h4>
+    <ul>
+        <li>North: 49.0, South: 48.0, East: 3.0, West: 1.5 = Paris weather</li>
+        <li>North: 40.0, South: 41.0, East: -73.0, West: -75.0 = New York weather</li>
+        <li>North: 52.0, South: 51.0, East: 0.0, West: -1.0 = London weather</li>
+    </ul>
+
+    <script src="libs/js/jquery-3.7.1.min.js"></script>
+    <script src="libs/js/script.js"></script>
+</body>
+
+</html>
