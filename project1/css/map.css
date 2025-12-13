@@ -1,0 +1,295 @@
+html {
+    margin: 0;
+    height: 100%;
+}
+
+/*navbar styling:*/
+.navbar {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.navbar a,
+.navbar span,
+.navbar select {
+    color: #f1f1f1;
+}
+.navbar select {
+    background-color: #2a2f50;
+    border: 1px solid #444;
+    color: #f1f1f1;
+}
+
+/*map is spread across and dark linear gradient*/
+#map {
+    height: 100vh;
+    width: 100vw;
+    background-image: linear-gradient(135deg, #2a2f50, #1a1a2a);
+    position: relative;
+}
+
+/*Overlay panel for country info, can scroll and takes up 25% of screen on desktop*/
+#overlayMapPanel {
+    position: absolute;
+    top: 56px;
+    left: 0;
+    z-index: 1000;
+    padding: 25px 20px;
+    height: calc(100vh - 56px);
+    width: 25%;
+    background: rgba(20, 20, 30, 0.85);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    color: #f1f1f1;
+    display: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/*when panel has class open show it*/
+#overlayMapPanel.open {
+    display: block;
+}
+
+/*Styling for scroll bar:*/
+#overlayMapPanel::-webkit-scrollbar {
+    background-color: rgba(20, 20, 30, 0.85);
+    width: 8px;
+}
+#overlayMapPanel::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 5px;
+}
+#overlayMapPanel::-webkit-scrollbar-thumb:hover {
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+
+#overlayMapPanel strong {
+    color: #9fa8ff;
+    font-weight: 500;
+}
+
+/*Top section of the overlay card styling:*/
+.topOverlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.topOverlay img {
+    width: 100px;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    background: black;
+}
+.topOverlay h2 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    margin: 4px 0;
+    text-align: center;
+    color: white;
+}
+.topOverlay p {
+    font-size: 13px;
+    font-weight: 400;
+    opacity: 0.8;
+    margin: 0;
+    text-align: center;
+    letter-spacing: 0.3px;
+    color: #c5c9ff;
+}
+
+/*grid layout for country info*/
+.infoOverlay {
+    font-size: 13px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+/*country image container styling:*/
+.countryImageContainer {
+    width: 100%;
+    margin: 10px 0;
+    text-align: center;
+}
+.countryImageContainer img {
+    width: 100%;
+    margin: 0;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+
+}
+.countryImageContainer .captionImage {
+    display: block;
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+/*Close overlay button styling:*/
+.closeOverlayButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    height: 20px;
+    width: 20px;
+    color: black;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.5);
+}
+.closeOverlayButton:hover {
+    background-color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+}
+
+/*leaflet map positioning for zoom in andout controls*/
+.leaflet-top {
+    top: 70px;
+    right: 10px;
+}
+
+/*wiki links*/
+#wikiLinks a {
+    color: white;
+}
+
+/*loader overlay*/
+#loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(20, 20, 30, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+/*POI loader overlay styling:*/
+#poiLoader {
+    position: fixed;
+    top: 50%;
+    left: 50%; 
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    background: rgba(20, 20, 30, 0.75);
+    backdrop-filter: blur(6px);
+    z-index: 3000;
+    display: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+#poiLoader p {
+    color: white;
+}
+
+/*Capital name title container styling centering middle of the screen so when the map zooms into the poi its there and z index is less than overlay so it's behind it on mobile*/
+#capitalTitleContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 900;
+    font-size: 24px;
+    color: white;
+    text-align: center;
+    display: none;
+    font-weight: 300;
+    letter-spacing: 2px;
+
+}
+
+/*spinner for loader and poiloader*/
+.spinner {
+    border: 8px solid rgba(255, 255, 255, 0.2);
+    border-top: 8px solid #9fa8ff;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+
+/*Spins the loader*/
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/*FOR MOBILE*/
+@media only screen and (max-width: 768px) {
+    /*overlay map panel*/
+    #overlayMapPanel {
+        width: 70vw;
+        height: 70vh;
+        max-height: 70vh;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -45%);
+        overflow-y: auto;
+        position: fixed;
+        justify-content: center;
+        padding: 15px;
+        border-radius: 10px;
+        
+    }
+
+    /*top overlay mobile styling:*/
+    .topOverlay {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+    }
+    .topOverlay h2 {
+        font-size: 15px;
+    }
+    .topOverlay p {
+        font-size: 10px;
+    }
+
+    /*info overlay mobile styling*/
+    .infoOverlay,
+    .infoOverlay .infoRow {
+        font-size: 12px;
+    }
+    .infoOverlay {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    /*country image container styling:*/
+    .countryImageContainer {
+        width: 100%;
+        margin-top: 10px;
+        text-align: center;
+    }
+    .countryImageContainer img {
+        width: 100%;
+        height: auto;
+    }
+
+    /*navbar dropdown countries font smaller*/
+    .navbar select{
+        font-size: 12px;
+    }
+}
