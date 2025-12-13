@@ -87,7 +87,7 @@ $.getJSON("./php/getCountry.php", function (response) {
             if (layer.feature.properties.iso_a2 === iso2) {
                 highlightCountry(layer);
                 //pushes to url so that the url includes the iso2 code makes it restful
-                history.pushState(null, null, `/project1/api/countries/${iso2}`); 
+                history.pushState(null, null, `/project1/api/countries/${iso2}`);
                 fetchCountryInfo(iso2, layer);
             }
         });
@@ -353,6 +353,12 @@ getLocalTime();
 $("#closeOverlayButton").on("click", function () {
     highlightCountry(null);
     $("#overlayMapPanel").removeClass('open');
+    poiLayer.clearLayers(); //clear pois on close overlay
+    map.setView([
+        51.505, -0.09], 4 //set view back to normal
+    );
+    $("#capitalTitleContainer").hide(); //hide title container
+    history.pushState(null, null, "/project1/"); 
 })
 
 //show circular loader
@@ -446,6 +452,11 @@ function getPOIs(lat, lng, radius = 5000) {
             });
 
             // Add markers to map
+            let bounds = markers.getBounds();
+            map.fitBounds(bounds, {
+                padding: [50, 50],
+                maxZoom: 10,
+            });
             poiLayer.addLayer(markers);
             hidePoiLoader();
         })
@@ -457,11 +468,8 @@ function getPOIs(lat, lng, radius = 5000) {
 
 //function to hide capital name once zoomed out more than 7 times as i only wanted it on the country to give a bit of context with the poi
 map.on("zoomend", function () {
-    if (map.getZoom() <= 7) {
-        $("#capitalTitleContainer").hide();
-    }
-    else {
-        $("#capitalTitleContainer").show();
+    if (map.getZoom() <= 8) {
+        $("#capitalTitleContainer").hide(); //hides capital when you zoom out, need ot figure how to have them all laid out there
     }
 })
 
