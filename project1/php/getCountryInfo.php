@@ -2,13 +2,23 @@
 header("Content-Type: application/json");
 //THIS FILE USES REST COUNTRIES API TO GET COUNTRY INFO BASED ON ISO2 CODE https://restcountries.com/#endpoints-all
 
-//gets ISO2 code from query parameter
-$iso2 = $_GET["iso2"];
+if (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || 
+    strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) != 'xmlhttprequest') {
+
+    //if not ajax request back to home page
+    $iso2 = $_GET['iso2'] ?? '';
+    header("Location: /project1/");
+    exit;
+}
 
 if(!isset($_GET["iso2"])){
     echo json_encode(["error" => "No ISO2 code provided"]);
     exit;
 }
+
+
+//gets ISO2 code from query parameter
+$iso2 = $_GET["iso2"];
 
 $url = "https://restcountries.com/v3.1/alpha/" . urlencode($iso2);
 $response = callApi($url);

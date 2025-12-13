@@ -10,6 +10,7 @@ $json = json_decode($data, true);
 $countries = [];
 $features = $json["features"]; //get the features first
 
+
 foreach ($features as $feature) {
     //grabs country name and ISO2 code
     $name = $feature["properties"]["name"];

@@ -16,6 +16,7 @@ let userLocationLayer;
 let poiLayer = L.layerGroup().addTo(map);
 let userInitiated = false;
 
+
 //highlights user's country
 function highlightUserCountry(layer) {
     if (!layer) {
@@ -93,6 +94,8 @@ $.getJSON("./php/getCountry.php", function (response) {
     });
 });
 
+
+
 //Fetches country and runs all the functions
 function fetchCountryInfo(iso2, layer) {
     highlightCountry(layer);
@@ -169,6 +172,7 @@ $.getJSON("data/countryBorders.geo.json", function (data) {
                 userInitiated = true;
                 //on country click we trigger the event change to change the country
                 $("#countrySelect").val(iso2).trigger("change", true);
+                history.pushState(null, null, `/project1/api/countries/${iso2}`);
                 //runs most the functions
                 fetchCountryInfo(iso2, layer);
                 console.log(name);
@@ -376,15 +380,15 @@ function hidePoiLoader() {
 //POI ICONS FROM ICONS FOLDER
 const poiIcons = {
     tourism: L.icon({
-        iconUrl: 'https://kierathdhugga.co.uk/project1/icons/tourism.png',
+        iconUrl: 'icons/tourism.png',
         iconSize: [60, 60],
     }),
     historic: L.icon({
-        iconUrl: 'https://kierathdhugga.co.uk/project1/icons/historic.png',
+        iconUrl: 'icons/historic.png',
         iconSize: [60, 60],
     }),
     religion: L.icon({
-        iconUrl: 'https://kierathdhugga.co.uk/project1/icons/religion.png',
+        iconUrl: 'icons/religion.png',
         iconSize: [60, 60],
 
     }),
@@ -460,3 +464,4 @@ map.on("zoomend", function () {
         $("#capitalTitleContainer").show();
     }
 })
+
