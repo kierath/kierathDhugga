@@ -386,15 +386,15 @@ function hidePoiLoader() {
 //POI ICONS FROM ICONS FOLDER
 const poiIcons = {
     tourism: L.icon({
-        iconUrl: 'icons/tourism.png',
+        iconUrl: 'https://kierathdhugga.co.uk/project1/icons/tourism.png',
         iconSize: [60, 60],
     }),
     historic: L.icon({
-        iconUrl: 'icons/historic.png',
+        iconUrl: 'https://kierathdhugga.co.uk/project1/icons/historic.png',
         iconSize: [60, 60],
     }),
     religion: L.icon({
-        iconUrl: 'icons/religion.png',
+        iconUrl: 'https://kierathdhugga.co.uk/project1/icons/religion.png',
         iconSize: [60, 60],
 
     }),
