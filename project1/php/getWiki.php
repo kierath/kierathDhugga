@@ -2,15 +2,16 @@
 header("Content-Type: application/json");
 //THIS FILE USES WIKI API TO GET WIKI INFO ASED ON THE CAPITAL https://en.wikipedia.org/api/rest_v1/
 
-if(!isset($_GET["capital"]) || empty($_GET["capital"])){
-    echo json_encode(["error" => "No capital found"]);
+if(!isset($_GET["country"]) || empty($_GET["country"])){
+    echo json_encode(["error" => "No country found"]);
     exit;
 }
 
-$capital = $_GET["capital"];
-$limit = 3; //top 3 results
+$country = $_GET["country"];
 
-$url = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=" . urlencode($capital) . "&utf8=&format=json&srlimit={$limit}";
+$searchlimit = 10; //5 results
+
+$url = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=" . urlencode($country) . "&utf8=&format=json&srlimit={$searchlimit}";
 
 $response = callApi($url);
 $data = json_decode($response, true);
@@ -20,10 +21,23 @@ $results = [];
 //if search results then loop, get title, creates an url and store in results array
 if(!empty($data["query"]["search"])){
     foreach($data["query"]["search"] as $item){
-        $results[] = [
-            "title" => $item["title"],
-            "link" => "https://en.wikipedia.org/wiki/" . str_replace(" ", "_", $item["title"])
+
+        $title = $item["title"];
+        if(stripos($title, "disambiguation") !== false) {
+            continue;
+        }
+
+        $summaryUrl = "https://en.wikipedia.org/api/rest_v1/page/summary/" . rawurlencode($title);
+        $summaryResult = callApi($summaryUrl);
+        $summaryData = json_decode($summaryResult, true);
+
+    $results[] = [
+        "title" => $title,
+        "link" => "https://en.wikipedia.org/wiki/" . str_replace(" ", "_", $item["title"]),
+        "summary" => $summaryData["extract"] ?? "No summary available",
+        "image" => $summaryData["thumbnail"]["source"] ?? null
         ];
+
     }
 }
 

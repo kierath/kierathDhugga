@@ -28,7 +28,7 @@ $weatherData = json_decode($weatherResponse, true);
 
 echo json_encode([
     "temperature" => $weatherData["main"]["temp"] ?? "N/A",
-    "description" => $weatherData["weather"][0]["description"] ?? "N/A",
+    "description" => ucfirst($weatherData["weather"][0]["description"]) ?? "N/A",
     "humidity" => $weatherData["main"]["humidity"] ?? "N/A",
     "wind_speed" => $weatherData["wind"]["speed"] ?? "N/A"
 ]);

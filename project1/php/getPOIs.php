@@ -7,9 +7,9 @@ $config = require_once __DIR__ . "/../config.php";
 $apiKey = $config["poi_API_KEY"]; 
 
 //get lat, lng, radius
-$lat = $_GET['lat'];
-$lng = $_GET['lng'];
-$radius = $_GET['radius'] ?? 5000; //default is 5000m
+$lat = $_GET["lat"];
+$lng = $_GET["lng"];
+$radius = $_GET["radius"] ?? 5000; 
 
 if (!$lat || !$lng) {
     echo json_encode(["error" => "Latitude and Longitude are required."]);
@@ -19,7 +19,7 @@ if (!$lat || !$lng) {
 //geoapify category tourism
 $categories = "tourism";
 
-$url = "https://api.geoapify.com/v2/places?categories={$categories}&filter=circle:{$lng},{$lat},{$radius}&limit=20&lang=en&apiKey={$apiKey}";
+$url = "https://api.geoapify.com/v2/places?categories={$categories}&filter=circle:{$lng},{$lat},{$radius}&limit=40&lang=en&apiKey={$apiKey}";
 
 
 $response = callApi($url);

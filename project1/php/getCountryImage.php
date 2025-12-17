@@ -12,8 +12,8 @@ if(!isset($_GET["country"])){
 }
 
 $country = $_GET["country"];
-
-$url = "https://api.unsplash.com/search/photos?query=" . urlencode($country) . "&orientation=landscape&per_page=1&client_id=" . $apiKey;
+$limit = 10; //number of results to fetch
+$url = "https://api.unsplash.com/search/photos?query=" . urlencode($country) . "&orientation=landscape&per_page=$limit&client_id=" . $apiKey;
 
 $response = callApi($url);
 $data = json_decode($response, true);
@@ -24,14 +24,19 @@ if(empty($data["results"][0]["urls"]["regular"])){
     exit;
 }
 
-$imageUrl = $data["results"][0]["urls"]["regular"];
-$caption = ucfirst($data["results"][0]["description"] ?? "Photo of $country"); //capitalises the description as they all seem to have lowercase
-$photographer = $data["results"][0]["user"]["name"] ?? ""; //if it says photo of country unknwon would look silly
+$images = [];
+
+foreach ($data["results"] as $photo) {
+    $images[] = [
+        "image" => $photo["urls"]["regular"],
+        "caption" => ucfirst($photo["description"] ?? "Photo of $country"), //capitalises the description as they all seem to have lowercase
+        "photographer" => $photo["user"]["name"] ?? "" //if it says photo of country unknwon would look silly
+    ];
+}
 
 echo json_encode([
-    "image" => $imageUrl,
-    "caption" => $caption,
-    "photographer" => $photographer
+    "country" => $country,
+    "images" => $images
 ]);
 
 // --------------- cURL -------------------

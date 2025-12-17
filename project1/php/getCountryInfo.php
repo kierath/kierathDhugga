@@ -1,6 +1,6 @@
 <?php
 header("Content-Type: application/json");
-//THIS FILE USES REST COUNTRIES API TO GET COUNTRY INFO BASED ON ISO2 CODE https://restcountries.com/#endpoints-all
+//THIS FILE USES REST COUNTRIES API TO GET COUNTRY INFO BASED ON ISO2 CODE https://restcountries.com/#endpoints-all & https://openexchangerates.org/
 
 if (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || 
     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) != 'xmlhttprequest') {
@@ -43,6 +43,9 @@ if(!empty($country["currencies"])){
     $currencies[] = "N/A";
 }
 
+$currencyCode = key($country["currencies"] ?? []);
+$exchangeRate = getExchangeRate($currencyCode);
+
 //result array with country info
 $result = [
     "name" => $country["name"]["common"] ?? "N/A",
@@ -52,10 +55,33 @@ $result = [
     "currencies" => $currencies,
     "lat" => $country["capitalInfo"]["latlng"][0] ?? null,
     "lng" => $country["capitalInfo"]["latlng"][1] ?? null,
-
+    "currencyCode" => $currencyCode,
+    "exchangeRate" => $exchangeRate,
 ];
 
 echo json_encode($result);
+
+//function to get exchange rate from Open Exchange Rates API
+function getExchangeRate($currencyCode){
+    if(!$currencyCode){
+        return "N/A";
+    }
+
+    //load config file for exchange rate api key
+    $config = include __DIR__ . "/../config.php";
+    $apiKey = $config["exchangeRate_API_KEY"];
+    $url = "https://openexchangerates.org/api/latest.json?app_id=" . urlencode($apiKey);
+
+    $response = callApi($url);
+    $data = json_decode($response, true);
+
+    if(isset($data["rates"][$currencyCode])){
+        return $data["rates"][$currencyCode];
+    } else {
+        return "N/A";
+    }
+
+}
 
 // --------------- cURL -------------------
 function callApi($url){
