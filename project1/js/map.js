@@ -147,7 +147,7 @@ $.getJSON("./php/getCountry.php", function (response) {
 });
 
 //Get GeoJSON data and add to map, on click the dropdown changes to country name
-$.getJSON("./php/getcountryBorders.php", function (data) {
+$.getJSON("./php/getCountryBorders.php", function (data) {
     countryLayer = L.geoJSON(data, {
         style: function (feature) {
             return {
