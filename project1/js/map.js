@@ -1,12 +1,43 @@
+
+//BASE MAP TILES
+const defaultMap = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        attribution: "&copy; OpenStreetMap contributors"
+    }
+);
+
+const lightMap = L.tileLayer(
+    "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+    {
+        attribution: "&copy; OpenStreetMap & CARTO",
+    }
+)
+
+const darkMap = L.tileLayer(
+    "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+    {
+        attribution: "&copy; OpenStreetMap & CARTO",
+    }
+)
+
 var map = L.map("map", {
     maxBounds: [[-90, -180], [90, 180]],
     maxBoundsViscosity: 1.0,
     zoomSnap: 0.1, //zooms out and in 0.1 at a time
     minZoom: 2,
     maxZoom: 15,
-    layers: []
+    layers: [lightMap]
 }).setView([51.505, -0.09], 4);
 
+const baseMaps = {
+    "Light": lightMap,
+    "Dark": darkMap,
+    "Default": defaultMap
+}
+
+const overlays = {}; //maybe add some overlays later
+
+L.control.layers(baseMaps, overlays, { position: "bottomright", collapsed: true }).addTo(map);
 map.removeControl(map.zoomControl); // I removed the map zoom in and out as adding the buttons kept the original one too
 L.control.zoom({ position: "topright" }).addTo(map); //add zoom in and out on right so not in way of the overlay
 
@@ -15,48 +46,60 @@ let highlightedLayer;
 let highlightedUserLocationLayer;
 let poiLayer = L.layerGroup().addTo(map);
 let userInitiated = false;
+let currentExchangeRate = null;
+let currentCurrencyCode = null;
 
 //BUTTONS ON CLICK OPEN MODALS
 $(document).ready(function () {
-    function openModal(modalId) {
-        $(".modal.show").modal('hide'); // hide open modals
-        $(modalId).modal('show'); // show the selected modal
-    }
-    $("#weatherButton").on("click", function () {
-        console.log("Weather button clicked");
-        openModal("#weatherModal");
-        const capital = $("#capital").text();
-        getWeather(capital); //get weather from capital name
-    });
-    $("#countryInfoButton").on("click", function () {
-        console.log("Country button clicked");
-        openModal("#countryInfoModal");
-        const iso2 = $("#countrySelect").val();
-        const country = $("#countryName").text();
-        getCountryFlag(iso2);
-        if (iso2) {
-            getTimezone(iso2, country); //if there is an iso2 code get timezone
-        }
-        $("#country-modalLoader").hide();
-    });
-    $("#wikiButton").on("click", function () {
-        console.log("Wiki button clicked");
-        openModal("#wikiModal");
-        const country = $("#countryName").text();
-        getWikiInfo(country); //get wiki info from country name
-    });
-    $("#imageButton").on("click", function () {
-        console.log("Image button clicked");
-        openModal("#countryImageModal");
-        const country = $("#countryName").text();
-        getCountryImage(country); //get country images from country name
-    });
-    $("#currencyButton").on("click", function () {
-        console.log("Currency button clicked");
-        openModal("#currencyModal"); //opens currency modal, currency info is already fetched when country is selected in fetchCountryInfo function
+    //fixing aria-hidden warning when closing modals
+    document.querySelectorAll(".modal").forEach((modalSelected) => {
+        modalSelected.addEventListener("hide.bs.modal", () => {
+            if (document.activeElement) document.activeElement.blur();
+        })
+    })
 
+    $("#amountInput").on("input", convertCurrency);
+
+    function closeAllModals() {
+        $(".modal.show").each(function () {
+            const modal = bootstrap.Modal.getInstance(this);
+            if (modal) modal.hide();
+        });
+    }
+
+    function openModal(modalId) {
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
+
+        closeAllModals();
+
+        const modalSelected = document.querySelector(modalId);
+        const modal = bootstrap.Modal.getOrCreateInstance(modalSelected);
+        modal.show();
+    }
+
+    $("#weatherButton").on("click", function () {
+        openModal("#weatherModal");
+    });
+
+    $("#countryInfoButton").on("click", function () {
+        openModal("#countryInfoModal");
+    });
+
+    $("#wikiButton").on("click", function () {
+        openModal("#wikiModal");
+    });
+
+    $("#imageButton").on("click", function () {
+        openModal("#countryImageModal");
+    });
+
+    $("#currencyButton").on("click", function () {
+        openModal("#currencyModal");
         $("#currency-modalLoader").hide();
     });
+
 });
 
 //Lists countries in dropdown
@@ -76,17 +119,23 @@ $.getJSON("./php/getCountry.php", function (response) {
     });
     //if country is selected from dropdown, it also highlights on map
     $("#countrySelect").on("change", function (event, triggeredByUser) {
-        if (triggeredByUser === true) {
-            userInitiated = true;
-        }
-
         let iso2 = $(this).val();
         if (!iso2) {
             return;
         }
+        if (triggeredByUser === true) {
+            userInitiated = true;
+        }
+
         countryLayer.eachLayer(function (layer) {
             if (layer.feature.properties.iso_a2 === iso2) {
                 highlightCountry(layer);
+
+                //zoom to country border
+                map.fitBounds(layer.getBounds(), {
+                    padding: [180, 180],
+                    maxZoom: 6
+                })
                 //pushes to url so that the url includes the iso2 code makes it restful
                 history.pushState(null, null, `/project1/api/countries/${iso2}`);
                 updateCountryInfo(iso2, layer);
@@ -98,16 +147,16 @@ $.getJSON("./php/getCountry.php", function (response) {
 });
 
 //Get GeoJSON data and add to map, on click the dropdown changes to country name
-$.getJSON("data/countryBorders.geo.json", function (data) {
+$.getJSON("./php/getcountryBorders.php", function (data) {
     countryLayer = L.geoJSON(data, {
         style: function (feature) {
             return {
                 //colour of country borders and countries when mapped out
                 className: "country-borders",
-                color: "white",
-                weight: 0.1,
-                fillColor: "#07132eff",
-                fillOpacity: 0.8,
+                stroke: false,
+                fillColor: "transparent",
+                interactive: true,
+                color: "transparent"
             };
         },
         onEachFeature: function (feature, layer) {
@@ -118,14 +167,6 @@ $.getJSON("data/countryBorders.geo.json", function (data) {
                 //on country click we trigger the event change to change the country
                 $("#countrySelect").val(iso2).trigger("change", true);
                 history.pushState(null, null, `/project1/api/countries/${iso2}`);
-
-                let bounds = layer.getBounds();
-                map.fitBounds(bounds, {
-                    padding: [100, 100],
-                    maxZoom: 7
-                });
-                //runs most the functions
-                updateCountryInfo(iso2, layer);
                 console.log(name);
             });
         }
@@ -155,13 +196,11 @@ $.getJSON("data/countryBorders.geo.json", function (data) {
                             let layerIso = layer.feature.properties.iso_a2.toUpperCase();
                             if (layerIso === detectedIso2) {
                                 console.log("User is in", layer.feature.properties.name, layer.feature.properties.layerIso);
-                                highlightUserCountry(layer); //if found highlight!
 
-                                //center map for start where user is
-                                map.fitBounds(layer.getBounds(), {
-                                    padding: [50, 50],
-                                    maxZoom: 4
-                                });
+                                $("#countrySelect")
+                                    .val(detectedIso2)
+                                    .trigger("change", true);
+
                                 //add popup where user coords are to show user where they are, is closeable
                                 L.popup({
                                     closeButton: true,
@@ -186,24 +225,6 @@ $.getJSON("data/countryBorders.geo.json", function (data) {
     }
 });
 
-//highlights user's country
-function highlightUserCountry(layer) {
-    if (!layer) {
-        return;
-    }
-    if (highlightedUserLocationLayer) {
-        countryLayer.resetStyle(highlightedUserLocationLayer); //reset previous user location style
-        highlightedUserLocationLayer = null;
-    }
-    //user's location outlines the country in red
-    layer.setStyle({
-        color: "red",
-        weight: 1,
-        fillOpacity: 0.9
-    });
-    highlightedUserLocationLayer = layer;
-}
-
 //Highlight country on click function
 function highlightCountry(layer) {
     if (highlightedLayer) {
@@ -213,8 +234,11 @@ function highlightCountry(layer) {
     if (layer) {
         //highlighted country has a thicker white border
         layer.setStyle({
-            color: "white",
-            weight: 1,
+            stroke: true,
+            color: "red",
+            weight: 2.0,
+            opacity: 0.8,
+            fill: false
         });
         highlightedLayer = layer;
     } else {
@@ -226,6 +250,8 @@ function highlightCountry(layer) {
 //Fetches country and runs all the functions
 function updateCountryInfo(iso2, layer) {
     showPoiLoader();
+    $("#amountInput").val("");
+    $("#convertedAmount").val("");
     highlightCountry(layer);
     poiLayer.clearLayers();
     //if no country selected show messages to select a country
@@ -244,14 +270,22 @@ function updateCountryInfo(iso2, layer) {
             let capitalLat = data.lat ?? data.latitude;
             let capitalLng = data.lng ?? data.longitude;
             console.log(capitalLat, capitalLng);
+            $("#country-modalLoader").hide();
             //GETS POIS OF CAPITAL
             getPOIs(capitalLat, capitalLng);
             //COUNTRY NAME
             console.log(`Country: ${data.name}`);
             $("#countryName").text(data.name);
+            getCountryImage(data.name); //get country images from country name
+            getWikiInfo(data.name); //get wiki info from country name
+            getCountryFlag(iso2); //get country flag from iso2 code
+            getTimezone(iso2, data.name); //get timezone from iso2 code and country name
             //CAPITAL NAME
             console.log(`Capital: ${data.capital}`);
             $("#capital").text(data.capital);
+            getWeather(data.capital); //get weather from capital name
+            $("#countryName").text(data.name);
+            $("#currencyCountryName").text(data.name);
             //POPULATION AMOUNT
             console.log(`Population: ${data.population}`);
             let population = Number(data.population)
@@ -263,7 +297,16 @@ function updateCountryInfo(iso2, layer) {
             //console.log(`Currencies: ${data.currencies.join(" , ")}`);
             $("#currencies").text(data.currencies.join(" , "));
             $("#exchangeRate").text(`1 GBP = ${data.exchangeRate} ${data.currencyCode}`);
+            currentExchangeRate = data.exchangeRate;
+            currentCurrencyCode = data.currencyCode;
+            //AREA AND LANGUAGES
 
+            $("#area").text(
+                data.area ? `${Number(data.area).toLocaleString()} km²` : "N/A"
+            );
+            $("#languages").text(
+                data.languages.length > 0 ? data.languages.join(", ") : "N/A"
+            );
         }
         else {
             console.log("Country data not found.");
@@ -282,7 +325,7 @@ async function getWeather(capital) {
         return;
     } else {
         toggleModalContent("#weatherInfo", "#weatherInfoMessage");
-        $("weather-modalLoader").show();
+        $("#weather-modalLoader").show();
     }
     try {
         const weather = await $.getJSON(`/project1/php/getWeather.php?capital=${capital}`);
@@ -293,11 +336,39 @@ async function getWeather(capital) {
             console.log(`Weather description: ${weather.description}`);
             console.log(`Humidity: ${weather.humidity}`);
             console.log(`Wind speed: ${weather.wind_speed}`);
+            console.log(weather);
             //sends to weather to designated classes to show in html
             $("#weatherDescription").text(weather.description || "No description");
-            $("#weatherTemperature").text(weather.temperature != null ? `${weather.temperature}°C` : "N/A");
+            $("#weatherTemperature").text(weather.temperature != null ? `${Math.round(weather.temperature)}°C` : "N/A");
+            $("#weatherFeelsLike").text(weather.feels_like != null ? `${Math.round(weather.feels_like)}°C` : "N/A");
             $("#weatherHumidity").text(weather.humidity != null ? `${weather.humidity}%` : "N/A");
             $("#weatherWindSpeed").text(weather.wind_speed != null ? `${weather.wind_speed}m/s` : "N/A");
+            $("#weatherIcon").attr("src", weather.icon_url).show();
+            $("#weatherCapital").text(weather.capital);
+
+            $("#weatherForecast").empty(); // clear previous forecast
+            //display 7 day forecastå
+            if (weather.forecast && weather.forecast.length > 0) {
+                const forecastRow = $('<div class="d-flex justify-content-between flex-row overflow-auto"></div>');
+
+                weather.forecast.forEach(day => {
+                    const forecastItem = $(`
+            <div class="forecast-day card text-center m-1 shadow-sm p-2 flex-shrink-0" style="width: 147px;">
+                <div><small>${day.date}</small></div>
+                <div class="d-flex justify-content-center align-items-center my-1" style="width: 100%; height: 50px;">
+                    <img src="${day.icon_url}" alt="${day.description}" class="w-70 h-100 object-fit-cover" />
+                </div>
+                <div class="text-muted mb-1"><small>${day.description}</small></div>
+                <div><small>Min: ${Math.round(day.temp_min)}°C</small></div>
+                <div><small>Max: ${Math.round(day.temp_max)}°C</small></div>
+            </div>
+        `);
+                    forecastRow.append(forecastItem);
+                });
+
+                $("#weatherForecast").append(forecastRow);
+            }
+
         }
         else {
             console.log(weather.error);
@@ -335,6 +406,7 @@ async function getCountryFlag(iso2) {
 //fetch country imag using country name
 async function getCountryImage(country) {
     //if no country selected show message to select a country
+    $("#countryImageName").text(country);
     if ($("#countrySelect").val() === "") {
         toggleModalContent("#countryImgMessage", null);
         $("#img-modalLoader").hide();
@@ -367,9 +439,8 @@ async function getCountryImage(country) {
 //fetch wiki info using country name
 async function getWikiInfo(country) {
     const container = $("#wikiLinks");
-
     try {
-        const wikiData = await $.getJSON(`/project1/php/getWiki.php?country=${country}`);
+        const wikiData = await $.getJSON(`/project1/php/getWiki.php?country=${encodeURIComponent(country)}`);
         if (!wikiData.results || wikiData.results.length === 0) {
             container.text("Please select a country first to see related wikipedia articles.");
             $("#wiki-modalLoader").hide();
@@ -378,6 +449,7 @@ async function getWikiInfo(country) {
         $("#wiki-modalLoader").show();
         container.empty(); // Clear previous links
         const template = document.getElementById("wikiTemplate");
+        $("#wikiCountryName").text(country);
 
         wikiData.results.forEach(result => {
             const clone = template.content.cloneNode(true);
@@ -385,6 +457,7 @@ async function getWikiInfo(country) {
             const img = clone.querySelector(".wikiImg");
             const title = clone.querySelector(".wikiTitle");
             const summary = clone.querySelector(".wikiSummary");
+
 
             if (result.image) {
                 img.src = result.image;
@@ -477,6 +550,10 @@ const poiIcons = {
     })
 };
 
+const airportIcon = L.icon({
+    iconUrl: 'https://kierathdhugga.co.uk/project1/icons/airplane.png',
+    iconSize: [40, 40],
+});
 //Gets pois from capitals latitude and longitude with a radius of 5000m using geoapify api - geonames didn't work as it only let me use a radius of 1
 async function getPOIs(lat, lng, radius = 5000) {
     poiLayer.clearLayers(); //clear previous pois
@@ -555,4 +632,22 @@ function hidePoiLoader() {
 function toggleModalContent(showContentId, hideContentId) {
     $(hideContentId).hide();
     $(showContentId).show();
+}
+
+function clearUserCountryHighlight() {
+    if (highlightedUserLocationLayer) {
+        countryLayer.resetStyle(highlightedUserLocationLayer); //reset previous user location style
+        highlightedUserLocationLayer = null;
+    }
+}
+
+function convertCurrency() {
+    const gbp = parseFloat($("#amountInput").val());
+    if (isNaN(gbp) || currentExchangeRate === null) {
+        $("#convertedAmount").val("");
+        return;
+    }
+
+    const converted = gbp * currentExchangeRate;
+    $("#convertedAmount").val(converted.toFixed(2));
 }

@@ -44,7 +44,19 @@ if(!empty($country["currencies"])){
 }
 
 $currencyCode = key($country["currencies"] ?? []);
-$exchangeRate = getExchangeRate($currencyCode);
+$rates = getExchangeRates();
+if(!$currencyCode || !isset($rates["GBP"]) || !isset($rates[$currencyCode])){
+    $exchangeRate = "N/A";
+} else {
+    $exchangeRate = $rates[$currencyCode] / $rates["GBP"];
+}
+
+$languages = !empty($country["languages"])
+    ? array_values($country["languages"])
+    : ["N/A"];
+
+
+$area = $country["area"] ?? "N/A";
 
 //result array with country info
 $result = [
@@ -52,6 +64,8 @@ $result = [
     "capital" => $country["capital"][0] ?? "N/A",
     "region" => $country["region"] ?? "N/A",
     "population" => $country["population"] ?? 0,
+    "area" => $area,
+    "languages" => $languages,
     "currencies" => $currencies,
     "lat" => $country["capitalInfo"]["latlng"][0] ?? null,
     "lng" => $country["capitalInfo"]["latlng"][1] ?? null,
@@ -62,26 +76,21 @@ $result = [
 echo json_encode($result);
 
 //function to get exchange rate from Open Exchange Rates API
-function getExchangeRate($currencyCode){
-    if(!$currencyCode){
-        return "N/A";
+function getExchangeRates(){
+    $config = include __DIR__ . "/../config.php";
+    $apiKey = $config["exchangeRate_API_KEY"] ?? null;
+
+    if (!$apiKey) {
+        return [];
     }
 
-    //load config file for exchange rate api key
-    $config = include __DIR__ . "/../config.php";
-    $apiKey = $config["exchangeRate_API_KEY"];
     $url = "https://openexchangerates.org/api/latest.json?app_id=" . urlencode($apiKey);
-
     $response = callApi($url);
     $data = json_decode($response, true);
 
-    if(isset($data["rates"][$currencyCode])){
-        return $data["rates"][$currencyCode];
-    } else {
-        return "N/A";
-    }
-
+    return $data["rates"] ?? [];
 }
+
 
 // --------------- cURL -------------------
 function callApi($url){

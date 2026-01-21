@@ -74,33 +74,42 @@ body {
     background: linear-gradient(135deg, #F4B400, #d89e00);
 }
 
-/*leaflet map positioning for zoom in andout controls*/
-.leaflet-top {
-    top: 70px;
-    right: 10px;
+.modal-backdrop.show {
+    backdrop-filter: blur(10px);
 }
 
-/*POI loader overlay styling:*/
+.hover-grow {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-grow:hover {
+    transform: scale(1.1); 
+}
+/*leaflet map positioning for zoom in andout controls*/
+.leaflet-control-layers {
+    z-index: 4000 !important;
+}
+
+.leaflet-top.leaflet-right .leaflet-control-zoom{
+  margin-top: 30px !important;
+}
+
+/*POI loader overlay styling*/
 #poiLoader {
     position: fixed;
-    top: 50%;
-    left: 50%;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    transform: translate(-50%, -50%);
     background: rgba(20, 20, 30, 0.75);
     backdrop-filter: blur(6px);
     z-index: 4000;
-    display: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+    display: flex;         
+    justify-content: center; 
+    align-items: center;    
+    flex-direction: column;  
 }
 
-#poiLoader p {
-    color: white;
-}
 
 /*spinner for loader and poiloader*/
 .spinner {

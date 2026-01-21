@@ -9,39 +9,32 @@ if(!isset($_GET["country"]) || empty($_GET["country"])){
 
 $country = $_GET["country"];
 
-$searchlimit = 10; //5 results
-
-$url = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=" . urlencode($country) . "&utf8=&format=json&srlimit={$searchlimit}";
+$url = "https://en.wikipedia.org/api/rest_v1/page/summary/" . rawurlencode($country);
 
 $response = callApi($url);
 $data = json_decode($response, true);
 
 $results = [];
 
-//if search results then loop, get title, creates an url and store in results array
-if(!empty($data["query"]["search"])){
-    foreach($data["query"]["search"] as $item){
-
-        $title = $item["title"];
-        if(stripos($title, "disambiguation") !== false) {
-            continue;
-        }
-
-        $summaryUrl = "https://en.wikipedia.org/api/rest_v1/page/summary/" . rawurlencode($title);
-        $summaryResult = callApi($summaryUrl);
-        $summaryData = json_decode($summaryResult, true);
-
-    $results[] = [
-        "title" => $title,
-        "link" => "https://en.wikipedia.org/wiki/" . str_replace(" ", "_", $item["title"]),
-        "summary" => $summaryData["extract"] ?? "No summary available",
-        "image" => $summaryData["thumbnail"]["source"] ?? null
-        ];
-
-    }
+if(isset($data["type"]) && $data["type"] === "disambiguation"){
+    echo json_encode(["error" => "Disambiguation page"]);
+    exit;
+}
+if(!isset($data["extract"])){
+    echo json_encode(["error" => "No summary found"]);
+    exit;
 }
 
-echo !empty($results) ? json_encode(["results" => $results]) : json_encode(["error" => "No results found"]);
+echo json_encode([
+    "results" => [
+        [
+            "title" => $data["title"],
+            "summary" => $data["extract"],
+            "image" => $data["thumbnail"]["source"] ?? null,
+            "link" => $data["content_urls"]["desktop"]["page"] ?? null
+        ]
+    ]
+]);
 
 // --------------- cURL -------------------
 function callApi($url){

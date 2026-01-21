@@ -7,22 +7,23 @@
 
     <title>Gazetteer</title>
     <!-- From leafletjs.com -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="libs/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="libs/leaflet-markercluster/MarkerCluster.css" />
+    <link rel="stylesheet" href="libs/leaflet-markercluster/MarkerCluster.Default.css" />
+
+    <!-- Bootstrap-->
+    <link rel="stylesheet" href="libs/bootstrap/bootstrap.min.css">
+
     <!-- My stylesheet for map.css -->
     <link rel="stylesheet" href="css/map.css">
-    <!-- Bootstrap import -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
-        integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+
 </head>
 
 <body>
     <div id="selectContainer" class="d-flex justify-content-center align-items-center">
         <!--dropdown select country -->
         <span id="currentTime"></span>
-        <select id="countrySelect" class="form-select shadow-sm" aria-label="Select Country">
+        <select id="countrySelect" class="form-select form-select-md shadow-sm rounded" aria-label="Select Country">
             <option value="">Select Country</option>
         </select>
     </div>
@@ -30,7 +31,7 @@
     <!--POI LOADER-->
     <div id="poiLoader">
         <div class="spinner"></div>
-        <p class="pl-2 px-2 mt-3 mb-3 text-center">Loading points of interest and country information...
+        <p class="mt-3 text-center text-white">Loading points of interest and country information...
             <br>This may take a little while...
         </p>
     </div>
@@ -38,31 +39,41 @@
     <div id="map"></div>
 
     <div class="button-container">
-        <button id="countryInfoButton" class="btn btn-link pl-3 p-1 mb-3 w-10 rounded-circle shadow-none">
-            <img src="./icons/worldinfo.png" width="40" class="rounded-circle">
-        </button>
-        <button id="weatherButton" class="btn btn-link p-1 pl-3 mb-3 w-10 rounded-circle shadow-none">
-            <img src="./icons/weather.png" width="40" class="rounded-circle">
+        <button id="countryInfoButton" class="btn btn-link ps-3 p-1 mb-3 rounded-circle shadow-none hover-grow"
+            aria-label="Country info">
+            <img src="./icons/worldinfo.png" width="40" class="rounded-circle" alt="">
         </button>
 
-        <button id="wikiButton" class="btn btn-link p-1 pl-3 mb-3 w-10 rounded-circle shadow-none">
-            <img src="./icons/wiki.png" width="40" class="rounded-circle">
+        <button id="weatherButton" class="btn btn-link ps-3 p-1 mb-3 rounded-circle shadow-none hover-grow"
+            aria-label="Weather">
+            <img src="./icons/weather.png" width="40" class="rounded-circle" alt="">
         </button>
-        <button id="imageButton" class="btn btn-link p-1 pl-3 mb-3 w-10 rounded-circle shadow-none">
-            <img src="./icons/pic.png" width="40" class="rounded-circle">
+
+        <button id="wikiButton" class="btn btn-link ps-3 p-1 mb-3 rounded-circle shadow-none hover-grow"
+            aria-label="Wiki">
+            <img src="./icons/wiki.png" width="40" class="rounded-circle" alt="">
         </button>
-        <button id="currencyButton" class="btn btn-link p-1 pl-3 mb-3 w-10 rounded-circle shadow-none">
-            <img src="./icons/currency.png" width="40" class="rounded-circle">
+
+        <button id="imageButton" class="btn btn-link ps-3 p-1 mb-3 rounded-circle shadow-none hover-grow"
+            aria-label="Images">
+            <img src="./icons/pic.png" width="40" class="rounded-circle" alt="">
+        </button>
+
+        <button id="currencyButton" class="btn btn-link ps-3 p-1 mb-3 rounded-circle shadow-none hover-grow"
+            aria-label="Currency">
+            <img src="./icons/currency.png" width="40" class="rounded-circle" alt="">
         </button>
     </div>
 
+
     <!-- COUNTRY INFO BUTTON OPENS THIS MODAL-->
-    <div id="countryInfoModal" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-dialog-centered">
+    <div id="countryInfoModal" class="modal fade" tabindex="-1" role="dialog" data-bs-backdrop="static"
+        data-bs-keyboard="false">
+        <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content shadow-lg rounded-lg">
-                <div class="modal-header-countryInfo modal-header bg-success text-white">
-                    <h4 class="modal-title">Country Information</h4>
-                    <button type="button" class="btn-close rounded-sm px-2" data-dismiss="modal">&times;</button>
+                <div class="modal-header-countryInfo modal-header text-white">
+                    <h4 class="modal-title">Country Information - <span id ="countryName">---</span></h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center" id="countryInfo">
                     <div id="country-modalLoader" class="text-center">
@@ -75,76 +86,112 @@
                         class="d-block mx-auto mb-2 rounded shadow-sm">
                     <h5 id="countryName" class="mb-0"></h5>
                     <small id="region" class="text-muted d-block"></small>
+                    <div class="container-fluid px-0">
+                        <div class="d-flex mb-2 border-bottom pb-1">
+                            <strong class="ps-3 me-2">Capital:</strong>
+                            <span id="capital"></span>
+                        </div>
+
+                        <div class="d-flex mb-2 border-bottom pb-1">
+                            <strong class="ps-3 me-2">Population:</strong>
+                            <span id="population"></span>
+                        </div>
+
+                        <div class="d-flex mb-2 border-bottom pb-1">
+                            <strong class="ps-3 me-2">Local time:</strong>
+                            <span id="countryTime"></span>
+                        </div>
+
+                        <div class="d-flex mb-2 border-bottom pb-1">
+                            <strong class="ps-3 me-2">Area:</strong>
+                            <span id="area"></span>
+                        </div>
+
+                        <div class="d-flex mb-2 border-bottom pb-1">
+                            <strong class="ps-3 me-2">Languages:</strong>
+                            <span id="languages"></span>
+                        </div>
+                    </div>
                 </div>
-                <div class="container-fluid px-0">
-                    <div class="d-flex mb-2 border-bottom pb-1">
-                        <strong class="pl-3 mr-2">Capital:</strong>
-                        <span id="capital"></span>
-                    </div>
-
-                    <div class="d-flex mb-2 border-bottom pb-1">
-                        <strong class="pl-3 mr-2">Population:</strong>
-                        <span id="population"></span>
-                    </div>
-
-                    <div class="d-flex mb-2 border-bottom pb-1">
-                        <strong class="pl-3 mr-2">Local time:</strong>
-                        <span id="countryTime"></span>
-                    </div>
-
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- WEATHER BUTTON OPENS THIS MODAL-->
-    <div id="weatherModal" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-dialog-centered">
+    <!-- WEATHER BUTTON OPENS THIS MODAL -->
+    <div id="weatherModal" class="modal fade" tabindex="-1" aria-hidden="true" role="dialog" data-bs-backdrop="static"
+        data-bs-keyboard="false">
+        <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content shadow-lg rounded-lg">
-                <div class="modal-header-weather modal-header bg-success bg-gradient text-white">
-                    <h4 class="modal-title">Current Weather Summary</h4>
-                    <button type="button" class="btn-close rounded-sm px-2" data-dismiss="modal">&times;</button>
+                <!-- Header -->
+                <div class="modal-header-weather modal-header text-white">
+                    <h5 class="modal-title">Weather Forecast - <span id="weatherCapital">---</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body text-center" id="weatherInfo">
-                    <div id="weather-modalLoader" class="text-center">
-                        <p>Loading...</p>
+
+                <!-- Body -->
+                <div class="modal-body text-center">
+                    <!-- Loader -->
+                    <div id="weather-modalLoader" class="my-3">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading weather information...</p>
                     </div>
-                    <div id="weatherInfoMessage" class="text-center">
+
+                    <!-- Message when no country selected -->
+                    <div id="weatherInfoMessage" class="my-3">
                         <span>Please select a country to show weather information.</span>
                     </div>
-                    <div class="container-fluid px-0">
-                        <div class="d-flex mb-2 border-bottom pb-1">
-                            <strong class="pl-3 mr-2">Weather:</strong>
-                            <span id="weatherDescription"></span>
+
+                    <!-- Weather Content -->
+                    <div id="weatherContent" class="mt-3">
+                        <!-- shows teemperature & icon -->
+                        <div class="d-flex flex-column align-items-center mb-3">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <h2 id="weatherTemperature" class="me-3 mb-0">--°C</h2>
+                                <img id="weatherIcon" src="" alt="Weather Icon" width="80" />
+                            </div>
+                            <p id="weatherDescription" class="mb-0 text-muted fs-5">--</p>
                         </div>
 
-                        <div class="d-flex mb-2 border-bottom pb-1">
-                            <strong class="pl-3 mr-2">Temperature:</strong>
-                            <span id="weatherTemperature"></span>
+                        <!-- Stats Row -->
+                        <div class="row text-center">
+                            <div class="col-4 border-end">
+                                <small class="text-muted d-block">Humidity</small>
+                                <span id="weatherHumidity">--%</span>
+                            </div>
+                            <div class="col-4 border-end">
+                                <small class="text-muted d-block">Wind</small>
+                                <span id="weatherWindSpeed">-- m/s</span>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted d-block">Feels like</small>
+                                <span id="weatherFeelsLike">--°C</span>
+                            </div>
                         </div>
-
-                        <div class="d-flex mb-2 border-bottom pb-1">
-                            <strong class="pl-3 mr-2">Humidity:</strong>
-                            <span id="weatherHumidity"></span>
-                        </div>
-
-                        <div class="d-flex mb-2 border-bottom pb-1">
-                            <strong class="pl-3 mr-2">Wind Speed:</strong>
-                            <span id="weatherWindSpeed"></span>
+                        <div id="weatherForecast" class="d-flex justify-content-between mt-3 overflow-auto">
+                            <!-- Forecast items here --->
                         </div>
                     </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- WIKI BUTTON OPENS THIS MODAL-->
-    <div id="wikiModal" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable ">
+    <div id="wikiModal" class="modal fade" tabindex="-1" role="dialog" data-bs-backdrop="static"
+        data-bs-keyboard="false">
+        <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable ">
             <div class="modal-content shadow-lg rounded-lg">
-                <div class="modal-header-wiki modal-header bg-success bg-gradient text-white">
-                    <h4 class="modal-title">Wiki Articles based on Country</h4>
-                    <button type="button" class="btn-close rounded-sm px-2" data-dismiss="modal">&times;</button>
+                <div class="modal-header-wiki modal-header text-white">
+                    <h4 class="modal-title">Wiki Summary - <span id ="wikiCountryName">---</span></h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body text-center" id="wikiInfo">
@@ -160,17 +207,21 @@
                     </template>
                     <span id="wikiLinks"></span>
                 </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- COUNTRY IMAGE BUTTON OPENS THIS MODAL-->
-    <div id="countryImageModal" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable ">
+    <div id="countryImageModal" class="modal fade" tabindex="-1" role="dialog" data-bs-backdrop="static"
+        data-bs-keyboard="false">
+        <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable ">
             <div class="modal-content shadow-lg rounded-lg">
-                <div class="modal-header-image modal-header bg-success bg-gradient text-white">
-                    <h4 class="modal-title">Country Image Information</h4>
-                    <button type="button" class="btn-close rounded-sm px-2" data-dismiss="modal">&times;</button>
+                <div class="modal-header-image modal-header text-white">
+                    <h4 class="modal-title"><span id ="countryImageName">---</span> Images</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center" id="countryImageInfo">
                     <div id="img-modalLoader" class="text-center">
@@ -180,18 +231,21 @@
                         <span>Please select a country to view images.</span>
                     </div>
                 </div>
-
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- CURRENCY INFO BUTTON OPENS THIS MODAL-->
-    <div id="currencyModal" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-dialog-centered">
+    <div id="currencyModal" class="modal fade" tabindex="-1" role="dialog" data-bs-backdrop="static"
+        data-bs-keyboard="false">
+        <div class="modal-dialog modal-md modal-dialog-centered">
             <div class="modal-content shadow-lg rounded-lg">
-                <div class="modal-header-currency modal-header bg-success bg-gradient text-white">
-                    <h4 class="modal-title">Currency Information</h4>
-                    <button type="button" class="btn-close rounded-sm px-2" data-dismiss="modal">&times;</button>
+                <div class="modal-header-currency modal-header text-white">
+                    <h4 class="modal-title">Currency for <span id ="currencyCountryName">---</span></h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center" id="currencyInfo">
                     <div id="currency-modalLoader" class="text-center">
@@ -202,27 +256,49 @@
                     </div>
                     <div class="container-fluid px-0">
                         <div class="d-flex mb-2 border-bottom pb-1">
-                            <strong class="pl-3 mr-2">Currency:</strong>
+                            <strong class="ps-3 me-2">Currency:</strong>
                             <span id="currencies"></span>
                         </div>
                         <div class="d-flex mb-2 border-bottom pb-1">
-                            <strong class="pl-3 mr-2">Exchange rate:</strong>
+                            <strong class="ps-3 me-2">Exchange rate:</strong>
                             <span id="exchangeRate"></span>
                         </div>
                     </div>
+
+                    <div class="container-fluid px-0">
+                        <div class="form-currency">
+                            <label for="amountInput"><strong class="pl-3 mr-2">Amount:</strong></label>
+                            <input type="number" id="amountInput" step="0.01" class="form-control d-inline-block"
+                                placeholder="Enter GBP amount" />
+                        </div>
+                        <div class="form-currency">
+                            <label><strong>Amount in local currency:</strong></label>
+                            <input type="number" id="convertedAmount" step="0.01" class="form-control d-inline-block"
+                                readonly />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- From leafletjs.com -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
-        crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <!-- jQuery -->
+    <script src="libs/jquery/jquery.min.js"></script>
+
+    <!-- Bootstrap -->
+    <script src="libs/bootstrap/bootstrap.bundle.min.js"></script>
+    <script>
+        console.log("bootstrap is", window.bootstrap);
+    </script>
+    a
+    <!-- Leaflet JS -->
+    <script src="libs/leaflet/leaflet.js"></script>
+
+    <!-- MarkerCluster JS -->
+    <script src="libs/leaflet-markercluster/leaflet.markercluster.js"></script>
 
     <script src="js/map.js"></script>
 </body>
