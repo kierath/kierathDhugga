@@ -1,7 +1,6 @@
 html,
 body {
     margin: 0;
-    height: 100%;
     padding: 0;
 }
 
@@ -10,7 +9,7 @@ body {
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 2500;
+    z-index: 1000;
     width: 100%;
     padding: 10px 20px;
     background: transparent !important;
@@ -29,34 +28,42 @@ body {
 /*map is spread across and dark linear gradient*/
 #map {
     height: 100vh;
-    width: 100vw;
+    width: 100%;
     background-image: linear-gradient(135deg, #2a2f50, #1a1a2a);
     position: relative;
-}
-
-.button-container {
-    position: fixed;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    z-index: 3000;
-    margin-bottom: 20px;
-    font-size: 20px;
-}
-
-#countryImageModal .modal-body,
-#wikiModal .modal-body {
-    max-height: 50vh;
-    overflow-y: auto;;
+    margin: 0;
+    padding: 0;
 }
 
 .image-modal {
     max-width: 600px;
 }
+
+#countryFlag {
+    object-fit: contain;
+    max-height: 20px;
+    width: 40px;
+    display: inline-block;
+    margin: 0 auto;
+    border-radius: 5px;
+    object-fit: fill;
+}
+
+.news-image {
+    width: 100%;
+    max-width: 150px;
+    height: 100px;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto;
+    border-radius: 8px;
+}
+
+.news-row td {
+    vertical-align: middle;
+    height: 100px;
+}
+
 /*MODAL CSS CUSTOM*/
 .modal-header-countryInfo {
     background: linear-gradient(135deg, #2EC4B6, #28b1a5);
@@ -67,8 +74,8 @@ body {
 .modal-header-wiki {
     background: linear-gradient(135deg, #ADB5BD, #9ea6ad);
 }
-.modal-header-image {
-    background: linear-gradient(135deg, #9B5DE5, #7f3fd6);
+.modal-header-news {
+    background: linear-gradient(135deg, #e82f2f, #d02222);
 }
 .modal-header-currency {
     background: linear-gradient(135deg, #F4B400, #d89e00);
@@ -95,7 +102,7 @@ body {
 }
 
 /*POI loader overlay styling*/
-#poiLoader {
+#mapLoader {
     position: fixed;
     top: 0;
     left: 0;

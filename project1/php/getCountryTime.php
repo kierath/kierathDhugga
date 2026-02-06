@@ -1,54 +1,48 @@
 <?php
-header("Content-Type: application/json");
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+header('Content-Type: application/json; charset=UTF-8');
+header('Access-Control-Allow-Origin: *');
 //THIS FILE USES TIMEZONEDB API TO GET COUNTRY TIME BASED ON ISO2 CODE https://timezonedb.com/api
 //gets ISO2 code from query parameter
+
+require_once __DIR__ . "/libs.php";
 
 //gets API key from config.php
 $config = require_once __DIR__ . "/../config.php";
 $apiKey = $config["timeZone_API_KEY"];
 
+if(!$apiKey){
+    respond(500, "error", "OpenCage API key not available");
+}
+
 if(!isset($_GET["iso2"]) || (!isset($_GET["name"]))){
-    echo json_encode(["error" => "No ISO2 code or country name provided"]);
-    exit;
+   respond(400, "error", "No country provided");
 }
 
 $iso2 = $_GET["iso2"];
 $name = $_GET["name"];
 $url = "https://api.timezonedb.com/v2.1/list-time-zone?key={$apiKey}&format=json&country=" . urlencode($iso2);
 $response = callApi($url);
+
+if($response === false){
+    respond(500, "error", "Failed to reach TimezoneDB API");
+}
+
 $data = json_decode($response, true);
 
-//if data zones not empty else no time zone found
-if(!empty($data["zones"])) {
-    $timezone = $data["zones"][0]["zoneName"];
-    echo json_encode([
-        "timezone" => $timezone,
-        "name" => $name
-    ]);
-} else {
-    echo json_encode([
-        "error" => "No timezone found",
-        "name" => $name
-    ]);
+$timezone = $data["zones"][0]["zoneName"] ?? null;
+
+if(!$timezone){
+    respond(404, "error", "No timezone for country: $iso2");
 }
 
-// --------------- cURL -------------------
-function callApi($url){
-    // Initialize new cURL session with given URL
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); //return response as string
-    curl_setopt($ch, CURLOPT_TIMEOUT, 10); //set timeout 10 seconds
+$result = [
+    "timezone" => $timezone,
+    "name" => $name
+];
 
-    $response = curl_exec($ch); 
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE); //HTTP response
-    curl_close($ch);
-
-    //successful HTTP 200
-    if ($httpCode === 200) {
-        return $response; //sends JSON response
-    } else //error
-    {
-        return json_encode(["error" => "Failed to fetch data"]);
-    }
-}
+respond(200, "success", "Timezone loaded successfully", $result);
 ?>

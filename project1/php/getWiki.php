@@ -1,10 +1,16 @@
 <?php
-header("Content-Type: application/json");
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+header('Content-Type: application/json; charset=UTF-8');
+header('Access-Control-Allow-Origin: *');
 //THIS FILE USES WIKI API TO GET WIKI INFO ASED ON THE CAPITAL https://en.wikipedia.org/api/rest_v1/
 
+require_once __DIR__ . "/libs.php";
+
 if(!isset($_GET["country"]) || empty($_GET["country"])){
-    echo json_encode(["error" => "No country found"]);
-    exit;
+    respond(400, "error", "No country provided");
 }
 
 $country = $_GET["country"];
@@ -12,48 +18,31 @@ $country = $_GET["country"];
 $url = "https://en.wikipedia.org/api/rest_v1/page/summary/" . rawurlencode($country);
 
 $response = callApi($url);
+
+if($response === false){
+    respond(500, "error", "Failed to reach Wikipedia API");
+}
+
 $data = json_decode($response, true);
 
-$results = [];
+if(!$data || isset($data["status"])){
+    respond(404, "error", "Country not found");
+}
 
 if(isset($data["type"]) && $data["type"] === "disambiguation"){
-    echo json_encode(["error" => "Disambiguation page"]);
-    exit;
+    respond(404, "error", "Disambiguation page found");
 }
 if(!isset($data["extract"])){
-    echo json_encode(["error" => "No summary found"]);
-    exit;
+    respond(404, "error", "No summary found");
 }
 
-echo json_encode([
-    "results" => [
-        [
+$result = [
             "title" => $data["title"],
             "summary" => $data["extract"],
             "image" => $data["thumbnail"]["source"] ?? null,
             "link" => $data["content_urls"]["desktop"]["page"] ?? null
-        ]
-    ]
-]);
+];
 
-// --------------- cURL -------------------
-function callApi($url){
-    // Initialize new cURL session with given URL
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); //return response as string
-    curl_setopt($ch, CURLOPT_TIMEOUT, 10); //set timeout 10 seconds
-    curl_setopt($ch, CURLOPT_USERAGENT, "Gazetteer/1.0 (kierath_dhugga@hotmail.co.uk)");
+respond(200, "success", "Wiki information loaded successfully", $result);
 
-    $response = curl_exec($ch); 
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE); //HTTP response
-    curl_close($ch);
-
-    //successful HTTP 200
-    if ($httpCode === 200) {
-        return $response; //sends JSON response
-    } else //error
-    {
-        return json_encode(["error" => "Failed to fetch data"]);
-    }
-}
 ?>

@@ -1,95 +1,71 @@
 <?php
-header("Content-Type: application/json");
-//THIS FILE USES GEOAPIFY API using lat, longitude, radius and categories to get top pois by top popularity and importance
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-//gets API key from config.php
+header('Content-Type: application/json; charset=UTF-8');
+header('Access-Control-Allow-Origin: *');
+//THIS FILE USES GEONAMES API TO GET POIS
+
+require_once __DIR__ . "/libs.php";
+
+//gets username from config.php
 $config = require_once __DIR__ . "/../config.php";
-$apiKey = $config["poi_API_KEY"]; 
+$username = $config["GEONAMES_USERNAME"];
+//get country
+$country = strtoupper($_GET["iso2"] ?? '');
 
-//get lat, lng, radius
-$lat = $_GET["lat"];
-$lng = $_GET["lng"];
-$radius = $_GET["radius"] ?? 5000; 
-
-if (!$lat || !$lng) {
-    echo json_encode(["error" => "Latitude and Longitude are required."]);
-    exit;
+if(!$username){
+    respond(500, "error", "Geonames API not available invalid username");
 }
 
-//geoapify category tourism
-$categories = "tourism";
-
-$url = "https://api.geoapify.com/v2/places?categories={$categories}&filter=circle:{$lng},{$lat},{$radius}&limit=40&lang=en&apiKey={$apiKey}";
-
-
-$response = callApi($url);
-if ($response === false) {
-    echo json_encode(["error" => "Failed to fetch POIs."]);
-    exit;
+if(!$country) {
+    respond(404, "error", "Country not found");
 }
 
-$data = json_decode($response, true);
+$queries = [
+    "tourism" => ["MUS", "MNMT"], 
+    "religion" => ["RLG" ],
+    "airport" => ["AIRP"]
+];
+$pois = [];
 
-//famous poi array
-$famousPOIs = [];
+foreach ($queries as $q => $fcodes) { 
+    foreach ($fcodes as $fcode) {
+        $url = "http://api.geonames.org/searchJSON?fcode={$fcode}&country={$country}&maxRows=50&username={$username}";
+        $response = callApi($url);
 
-foreach ($data['features'] as $poi) {
-    $properties = $poi['properties'];
-    
-    // assigns first available value English name, default name, address line or description
-    $poiName = $properties['name_international']['en'] ?? $properties['name'] ?? $properties['address_line1'] ?? $properties['description'];
-    //if no name go to the next one
-    if (!$poiName) continue;
+        if ($response === false) {
+            respond(500, "error", "Failed to fetch POIs from Geonames API");
+        }
 
-    // Check the importance and popularity rank
-    $importance = $properties['rank']['importance'] ?? 0;
-    $popularity = $properties['rank']['popularity'] ?? 0;
-    $isFamousByRank = $importance > 0.70 || $popularity > 85;
+        $data = json_decode($response, true);
 
-    // Check if the POI fits into relevant categories
-    $categories = $properties['categories'] ?? [];
-    $isFamousByCategory = false;
-    foreach ($categories as $category) {
-        //if category contains certain categories if so $isfamousByCategory is true
-        if (strpos($category, "tourism.sights") !== false ||
-            strpos($category, "tourism.attraction") !== false ||
-            strpos($category, "historic") !== false ||
-            strpos($category, "memorial") !== false ||
-            strpos($category, "tower") !== false) {
-            $isFamousByCategory = true;
-            break;
+        // Loop through results
+        foreach ($data['geonames'] as $poi) {
+            if (!isset($poi['name'], $poi['lat'], $poi['lng'])) {
+                continue; 
+            }
+
+            $pois[] = [
+                "name" => $poi["name"],
+                "lat" => floatval($poi["lat"]),
+                "lng" => floatval($poi["lng"]),
+                "type" => $q
+            ];
         }
     }
-
-    // POI if famous by rank or category
-    if ($isFamousByRank || $isFamousByCategory) {
-        $famousPOIs[] = [
-            "name" => $poiName,
-            "lat" => $poi['geometry']['coordinates'][1],
-            "lng" => $poi['geometry']['coordinates'][0],
-            "categories" => $categories
-        ];
-    }
 }
 
-echo json_encode(['pois' => $famousPOIs]);
-// --------------- cURL -------------------
-function callApi($url){
-    // Initialize new cURL session with given URL
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); //return response as string
-    curl_setopt($ch, CURLOPT_TIMEOUT, 10); //set timeout 10 seconds
+if(empty($pois)){
+    respond(404, "error", "No POIs found for this country");
+} else {
+    $result = [
+    'pois' => $pois
+];
+respond(200, "success", "Country information loaded successfully", $result);
 
-    $response = curl_exec($ch); 
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE); //HTTP response
-    curl_close($ch);
-
-    //successful HTTP 200
-    if ($httpCode === 200) {
-        return $response; //sends JSON response
-    } else //error
-    {
-        return json_encode(["error" => "Failed to fetch data"]);
-    }
 }
+
+
 ?>
