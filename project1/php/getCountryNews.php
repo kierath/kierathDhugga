@@ -58,7 +58,7 @@ foreach($data["results"] as $article){
         "image" => $article["image_url"] ?? null
     ];
 
-    if(count($newsArticles) >= 1){
+    if(count($newsArticles) >= 5){
         break; // Limit to 5 articles CHANGE AFTER
     }
 }
