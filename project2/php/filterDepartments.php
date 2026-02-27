@@ -11,7 +11,7 @@
 
 	//database connection ERROR 300
 	if ($conn["error"]) {
-		sendJSONResponse(300, "failure", "database unavailable", $executionTime);
+		sendJSONResponse(300, "failure", "database unavailable", $executionTime, [], null);
 		exit;
 	}
 
