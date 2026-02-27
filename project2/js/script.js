@@ -124,6 +124,9 @@ $("#refreshBtn").click(function () {
   //spin class added to indicate loading, will be removed in the complete callback of the ajax request in the load functions
   $("#refreshIcon").addClass("spin");
 
+  //clear and retrigger search bar
+  $("#searchInp").val("").trigger("keyup");
+  
   //timeout 500ms so that refresh animation shows
   setTimeout(function () {
 

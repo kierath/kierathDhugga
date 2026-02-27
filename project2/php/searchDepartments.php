@@ -33,7 +33,7 @@
 		ORDER BY d.name
     ');
                             
-  	$likeText = "%" . $GET['txt'] . "%";
+  	$likeText = "%" . $_GET['txt'] . "%";
 
   	$query->bind_param("ss", $likeText, $likeText);
 
