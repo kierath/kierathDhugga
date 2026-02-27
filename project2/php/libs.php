@@ -33,7 +33,7 @@ function sendJSONResponse($code, $name, $description, $executionTime, $data = []
             "code" => $code,
             "name" => $name,
             "description" => $description,
-            "returnedIn" => (microtime(true) - $executionTime) / 1000 . " ms"
+            "returnedIn" => ((microtime(true) - $executionTime) * 1000) . " ms"
         ],
         "data" => $data
     ];
