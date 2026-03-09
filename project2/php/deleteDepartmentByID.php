@@ -21,7 +21,7 @@
 		$id = trim($_GET['id']);
 		
 		//check query to see if employees are assigned
-		$checkQuery = $conn["conn"]->prepare('SELECT COUNT(*) as total FROM personnel WHERE departmentID = ?');
+		$checkQuery = $conn["conn"]->prepare('SELECT COUNT(id) as total FROM personnel WHERE departmentID = ?');
 		$checkQuery->bind_param("i", $id);
 		$checkQuery->execute();
 		$row = $checkQuery->get_result()->fetch_assoc();
@@ -49,7 +49,7 @@
 
 	$id = $_POST['id'];
 
-	$checkQuery = $conn["conn"]->prepare('SELECT COUNT(*) as total FROM personnel WHERE departmentID = ?');
+	$checkQuery = $conn["conn"]->prepare('SELECT COUNT(id) as total FROM personnel WHERE departmentID = ?');
 
 	if(!$checkQuery) {
 		sendJSONResponse(400, "failure", "Delete department check query preparation failed", $executionTime, [

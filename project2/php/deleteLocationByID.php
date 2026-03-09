@@ -17,7 +17,7 @@
 
 		$id = trim($_GET['id']);
 
-		$checkQuery = $conn["conn"]->prepare('SELECT COUNT(*) as total FROM department WHERE locationID = ?');
+		$checkQuery = $conn["conn"]->prepare('SELECT COUNT(id) as total FROM department WHERE locationID = ?');
 		$checkQuery->bind_param("i", $id);
 		$checkQuery->execute();
 		$row = $checkQuery->get_result()->fetch_assoc();
@@ -47,7 +47,7 @@
 
 	$id = trim($_POST['id']);
 
-	$checkQuery = $conn["conn"]->prepare('SELECT COUNT(*) as total FROM department WHERE locationID = ?');
+	$checkQuery = $conn["conn"]->prepare('SELECT COUNT(id) as total FROM department WHERE locationID = ?');
 
 	if(!$checkQuery) {
 		sendJSONResponse(400, "failure", "Delete location check query preparation failed", $executionTime, [

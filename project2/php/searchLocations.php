@@ -16,10 +16,7 @@
 		exit;
 	}	
 
-	if(empty($_GET['txt'])) {
-		sendJSONResponse(400, "failure", "search locations, txt cannot be empty", $executionTime, [], $conn["conn"]);
-		exit;
-	}
+	$txt = empty($_GET['txt']) ? "%" : "%" . $_GET['txt'] . "%";
 
 	$query = $conn["conn"]->prepare('
 		SELECT id, name AS locationName
@@ -36,9 +33,8 @@
 		exit;
 	}
                             
-  	$likeText = "%" . $_GET['txt'] . "%";
 
-  	$query->bind_param("s", $likeText);
+  	$query->bind_param("s", $txt);
 
 	$success = $query->execute();
 	

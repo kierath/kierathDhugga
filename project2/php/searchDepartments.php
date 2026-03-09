@@ -28,8 +28,7 @@
 		l.name AS locationName
         FROM department d 
 		LEFT JOIN location l ON l.id = d.locationID
-        WHERE d.name LIKE ?
-		OR l.name LIKE ?
+        WHERE (d.name LIKE ? OR l.name LIKE ?)
 		ORDER BY d.name
     ');
                             
