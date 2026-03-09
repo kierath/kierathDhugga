@@ -26,7 +26,7 @@ $("#searchInp").on("keyup", function () {
     ajaxRequest("php/searchDepartments.php", "GET", { txt: query }, function (result) {
 
       if (result.status.code == 200) {
-        renderDepartments("departmentTableBody", result.data.found, "departmentName", "locationName", "departmentID");
+        renderDepartments("departmentTableBody", result.data.found, "departmentName", "locationName");
       }
       else {
         //console.log("Search error: " + result.status.description);
@@ -115,8 +115,8 @@ $("#filterPersonnelForm").on("submit", function (e) {
   }, function (result) {
     //console.log(JSON.stringify(result));
     if (result.status.code == 200) {
-
       renderPersonnel("personnelTableBody", result.data.found, "departmentName", "locationName");
+      closeModal("filterPersonnelModal"); //closes filter
     }
     else {
       console.log("Error: " + result.status.description);
@@ -124,24 +124,6 @@ $("#filterPersonnelForm").on("submit", function (e) {
   });
 });
 
-$("#filterDepartmentsForm").on("submit", function (e) {
-  e.preventDefault();
-
-  // Get the selected filter values
-  const locationID = $("#filterDepartmentsLocation").val();
-
-  // Make an AJAX request to the server with the selected filter values
-  ajaxRequest("php/filterDepartments.php", "GET", { locationID: locationID }, function (result) {
-    //console.log(JSON.stringify(result));
-    if (result.status.code == 200) {
-      renderDepartments("departmentTableBody", result.data.departments, "name", "location", "id");
-      closeModal("filterDepartmentsModal");
-    }
-    else {
-      console.log("Error: " + result.status.description);
-    }
-  });
-});
 
 $("#addBtn").click(function () {
   //active tab opens specific modal
@@ -160,31 +142,19 @@ $("#addBtn").click(function () {
 $("#personnelBtn").click(function () {
   //so filter is enabled
   $("#filterBtn").prop("disabled", false);
-  // Clear search input
-  $("#searchInp").val("");
-  //refresh personnel table
-  loadPersonnel();
-
+  $("#searchInp").trigger("keyup");
 });
 
 $("#departmentsBtn").click(function () {
   //filter disabled
   $("#filterBtn").prop("disabled", true);
-  // Clear search input
-  $("#searchInp").val("");
-  //refresh department table
-  loadDepartments();
-
+  $("#searchInp").trigger("keyup");
 });
 
 $("#locationsBtn").click(function () {
   //filter disabled
   $("#filterBtn").prop("disabled", true);
-  // Clear search input
-  $("#searchInp").val("");
-  // refresh location table
-  loadLocations();
-
+  $("#searchInp").trigger("keyup");
 });
 
 /*********PERSONNEL************/
@@ -599,7 +569,7 @@ function loadDepartments() {
 
     if (result.status.code == 200) {
 
-      renderDepartments("departmentTableBody", result.data, "name", "location", "id");
+      renderDepartments("departmentTableBody", result.data, "name", "location");
     }
     else {
       console.log("Error: " + result.status.description);
@@ -707,6 +677,21 @@ function ajaxRequest(url, type, data, onSuccess, onComplete) {
   });
 }
 
+function createActionButtons(modalTarget, id) {
+  var btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "btn btn-primary btn-sm";
+  btn.setAttribute("data-bs-toggle", "modal");
+  btn.setAttribute("data-bs-target", "#" + modalTarget); //modal
+  btn.setAttribute("data-id", id);
+
+  var icon = document.createElement("i"); //html tag i
+  icon.className = modalTarget.includes("edit") ? "fa-solid fa-pencil fa-fw" : "fa-solid fa-trash fa-fw";
+
+  btn.append(icon);
+  return btn;
+}
+
 //render tables frag
 //personnel
 function renderPersonnel(tbodyID, data, deptField, locField) {
@@ -745,17 +730,9 @@ function renderPersonnel(tbodyID, data, deptField, locField) {
       var tdActions = document.createElement("td");
       tdActions.className = "text-end text-nowrap";
 
-
-      tdActions.innerHTML = `
-        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-        data-bs-target="#editPersonnelModal" data-id="${person.id}">
-          <i class="fa-solid fa-pencil fa-fw"></i>
-        </button>
-        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-        data-bs-target="#deletePersonnelModal" data-id="${person.id}">
-          <i class="fa-solid fa-trash fa-fw"></i>
-        </button>
-      `;
+      tdActions.append(createActionButtons("editPersonnelModal", person.id));
+      tdActions.append(document.createTextNode(" "));
+      tdActions.append(createActionButtons("deletePersonnelModal", person.id));
 
       row.append(tdActions);
       frag.append(row);
@@ -767,7 +744,7 @@ function renderPersonnel(tbodyID, data, deptField, locField) {
 }
 
 //departments
-function renderDepartments(tbodyID, data, nameField, locField, idField) {
+function renderDepartments(tbodyID, data, nameField, locField) {
   var frag = document.createDocumentFragment();
 
   if (!data || data.length === 0) {
@@ -795,17 +772,9 @@ function renderDepartments(tbodyID, data, nameField, locField, idField) {
       var tdActions = document.createElement("td");
       tdActions.className = "text-end text-nowrap";
 
-
-      tdActions.innerHTML = `
-        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-        data-bs-target="#editDepartmentModal" data-id="${dept.id}">
-          <i class="fa-solid fa-pencil fa-fw"></i>
-        </button>
-        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-        data-bs-target="#deleteDepartmentModal" data-id="${dept.id}">
-          <i class="fa-solid fa-trash fa-fw"></i>
-        </button>
-      `;
+      tdActions.append(createActionButtons("editDepartmentModal", dept.id));
+      tdActions.append(document.createTextNode(" "));
+      tdActions.append(createActionButtons("deleteDepartmentModal", dept.id));
 
       row.append(tdActions);
       frag.append(row);
@@ -837,16 +806,11 @@ function renderLocations(tbodyID, data, nameField, idField) {
 
       var tdActions = document.createElement("td");
       tdActions.className = "text-end text-nowrap";
-      tdActions.innerHTML = `
-        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-        data-bs-target="#editLocationModal" data-id="${location.id}">
-          <i class="fa-solid fa-pencil fa-fw"></i>
-        </button>
-        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-        data-bs-target="#deleteLocationModal" data-id="${location.id}">
-          <i class="fa-solid fa-trash fa-fw"></i>
-        </button>
-      `;
+
+      tdActions.append(createActionButtons("editLocationModal", location.id));
+      tdActions.append(document.createTextNode(" "));
+      tdActions.append(createActionButtons("deleteLocationModal", location.id));
+
       row.append(tdActions);
       frag.append(row);
     });
