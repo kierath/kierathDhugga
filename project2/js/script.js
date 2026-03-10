@@ -73,57 +73,40 @@ $("#filterBtn").click(function () {
 
   if (tab === "personnel") {
     openModal("filterPersonnelModal");
-
-    // keeps selected values on reopen
-    if ($("#filterPersonnelDepartment option").length === 0) {
-      populateDropdown("#filterPersonnelDepartment", "php/getAllDepartments.php", "id", "name", true);
-    }
-    if ($("#filterPersonnelLocation option").length === 0) {
-      populateDropdown("#filterPersonnelLocation", "php/getAllLocations.php", "id", "name", true);
-    }
-
   }
-
 });
 
-$("#filterPersonnelDepartment").change(function () {
-  if ($(this).val() !== "") {
+$("#filterPersonnelModal").on("show.bs.modal", function () {
+  let currentDept = $("#filterPersonnelDepartment").val();
+  let currentLoc = $("#filterPersonnelLocation").val();
+  populateDropdown("#filterPersonnelDepartment", "php/getAllDepartments.php", "id", "name", true, currentDept);
+  populateDropdown("#filterPersonnelLocation", "php/getAllLocations.php", "id", "name", true, currentLoc);
+})
+
+$("#filterPersonnelModal").on("change", "#filterPersonnelDepartment, #filterPersonnelLocation", function () {
+
+  //either or logic
+  if ($(this).attr("id") === "filterPersonnelDepartment") {
     $("#filterPersonnelLocation").val("");
   }
-});
-
-$("#filterPersonnelLocation").change(function () {
-  if ($(this).val() !== "") {
+  else {
     $("#filterPersonnelDepartment").val("");
   }
-});
 
-$("#filterPersonnelForm").on("submit", function (e) {
-  e.preventDefault();
-
-  // Gets the selected filter values
   const departmentID = $("#filterPersonnelDepartment").val();
   const locationID = $("#filterPersonnelLocation").val();
   const search = $("#searchInp").val().trim();
 
-
-  // Make an AJAX request to the server with the selected filter values
   ajaxRequest("php/searchAll.php", "GET", {
     txt: search,
     departmentID: departmentID,
     locationID: locationID
-  }, function (result) {
-    //console.log(JSON.stringify(result));
-    if (result.status.code == 200) {
+  }, function (result){
+    if (result.status.code == 200){
       renderPersonnel("personnelTableBody", result.data.found, "departmentName", "locationName");
-      closeModal("filterPersonnelModal"); //closes filter
     }
-    else {
-      console.log("Error: " + result.status.description);
-    }
-  });
+  })
 });
-
 
 $("#addBtn").click(function () {
   //active tab opens specific modal
