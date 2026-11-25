@@ -9,6 +9,8 @@ header('Access-Control-Allow-Origin: *');
 
 require_once __DIR__ . "/libs.php";
 
+$config = require_once __DIR__ . "/../config.php";
+
 //if there is not iso2 
 if(!isset($_GET["iso2"]) || trim($_GET["iso2"]) === ""){
     respond(400, "error", "No ISO2 code provided");
@@ -16,21 +18,36 @@ if(!isset($_GET["iso2"]) || trim($_GET["iso2"]) === ""){
 
 $iso2 = $_GET["iso2"];
 
-$url = "https://restcountries.com/v3.1/alpha/" . urlencode($iso2);
+$apiKey = $config["restCountries_API_KEY"];
 
-$response = callApi($url);
+if(!$apiKey){
+    respond(500, "error", "Rest Countries API key not available");
+}
+
+$url = "https://api.restcountries.com/countries/v5/codes.alpha_2/" . urlencode($iso2);
+
+$response = callApi($url, [
+    "Authorization: Bearer " . $apiKey
+]);
+
 if($response === false){
     respond(500, "error", "Failed to reach Rest Countries API");
 }
+
 $data = json_decode($response, true);
 
-//if data empty then no flag found
-if(empty($data[0]["flags"]["png"])){
-    respond(404, "error", "Flag not found or ISO2");
+$country = $data["data"]["objects"][0] ?? null;
+
+if(!$country){
+    respond(404, "error", "Country not found");
 }
 
-//first flag png
-$flag = $data[0]["flags"]["png"];
+
+$flag = $country["flag"]["url_png"] ?? null;
+
+if(!$flag){
+    respond(404, "error", "Flag not found");
+}
 
 $result = [
     "flag" => $flag

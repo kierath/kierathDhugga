@@ -8,6 +8,8 @@ header('Access-Control-Allow-Origin: *');
 //THIS FILE USES REST COUNTRIES API TO GET COUNTRY INFO BASED ON ISO2 CODE https://restcountries.com/#endpoints-all & https://openexchangerates.org/
 require_once __DIR__ . "/libs.php";
 
+$config = require_once __DIR__ . "/../config.php";
+
 //gets ISO2 code from query parameter
 $iso2 = $_GET["iso2"];
 
@@ -16,8 +18,17 @@ if(!isset($_GET["iso2"]) || trim($_GET["iso2"]) === ""){
     respond(400, "error", "No ISO2 code provided");
 }
 
-$url = "https://restcountries.com/v3.1/alpha/" . urlencode($iso2);
-$response = callApi($url);
+$apiKey = $config["restCountries_API_KEY"];
+
+if(!$apiKey){
+    respond(500, "error", "Rest Countries API key not available");
+}
+
+$url = "https://api.restcountries.com/countries/v5/codes.alpha_2/" . urlencode($iso2);
+
+$response = callApi($url, [
+    "Authorization: Bearer " . $apiKey
+]);
 
 if($response === false){
     respond(500, "error", "Failed to reach Rest Countries API");
@@ -30,7 +41,8 @@ if(!$data || isset($data["status"])){
 }
 
 //checks country data, if no country then returns the error
-$country = $data[0] ?? null;
+$country = $data["data"]["objects"][0] ?? null;
+
 if(!$country){
     respond(404, "error", "Country not found");
 }
@@ -47,7 +59,7 @@ if(!empty($country["currencies"])){
     $currencies[] = "N/A";
 }
 
-$currencyCode = key($country["currencies"] ?? []);
+$currencyCode = $country["currencies"][0]["code"] ?? [];
 
 if(!$currencyCode || trim($currencyCode) === ""){
     respond(400, "error", "No currency code provided");
@@ -63,24 +75,28 @@ if(!$currencyCode || !isset($rates["USD"]) || !isset($rates[$currencyCode])){
 
 $exchangeRate = $rates[$currencyCode] / $rates["USD"];
 
-$languages = !empty($country["languages"])
-    ? array_values($country["languages"])
-    : ["N/A"];
+$languages = [];
+if(!empty($country["languages"])){
+    foreach($country["languages"] as $language){
+        $languages[] = $language["name"] ?? "N/A";
+    }
+} else {
+    $languages[] = "N/A";
+}
 
-
-$area = $country["area"] ?? "N/A";
+$area = $country["area"]["kilometers"] ?? "N/A";
 
 //result array with country info
 $result = [
-    "name" => $country["name"]["common"] ?? "N/A",
-    "capital" => $country["capital"][0] ?? "N/A",
+    "name" => $country["names"]["common"] ?? "N/A",
+    "capital" => $country["capitals"][0]["name"] ?? "N/A",
     "region" => $country["region"] ?? "N/A",
     "population" => $country["population"] ?? 0,
     "area" => $area,
     "languages" => $languages,
     "currencies" => $currencies,
-    "lat" => $country["capitalInfo"]["latlng"][0] ?? null,
-    "lng" => $country["capitalInfo"]["latlng"][1] ?? null,
+    "lat" => $country["capitals"][0]["coordinates"]["lat"] ?? null,
+    "lng" => $country["capitals"][0]["coordinates"]["lng"] ?? null,
     "currencyCode" => $currencyCode,
     "exchangeRate" => $exchangeRate,
 ];

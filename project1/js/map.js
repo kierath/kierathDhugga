@@ -1,24 +1,19 @@
-
 //BASE MAP TILES
-const defaultMap = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    {
-        attribution: "&copy; OpenStreetMap contributors"
-    }
-);
+const defaultMap = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors",
+    maxZoom: 19
+});
 
-const lightMap = L.tileLayer(
-    "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-    {
-        attribution: "&copy; OpenStreetMap & CARTO",
-    }
-)
+const lightMap = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+    attribution: "Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors",
+    maxZoom: 16
+});
 
-const darkMap = L.tileLayer(
-    "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-    {
-        attribution: "&copy; OpenStreetMap & CARTO",
-    }
-)
+const darkMap = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+    attribution: "Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors",
+    maxZoom: 16
+});
+
 
 //clustergroups
 const poiCluster = L.markerClusterGroup({
@@ -99,23 +94,23 @@ $(document).ready(function () {
         modal.show();
     }
 
-    L.easyButton("<img src='./icons/weather.svg'/>", function (btn, map) {
+    L.easyButton("<img src='./icons/weather.svg' alt='Show Weather Info'/>", function (btn, map) {
         openModal("#weatherModal");
     }, "Show Weather Info").addTo(map);
 
-    L.easyButton("<img src='./icons/worldinfo.svg'/>", function (btn, map) {
+    L.easyButton("<img src='./icons/worldinfo.svg' alt='Show Country Info'/>", function (btn, map) {
         openModal("#countryInfoModal");
     }, "Show Country Info").addTo(map);
 
-    L.easyButton("<img src='./icons/wiki.svg'/>", function (btn, map) {
+    L.easyButton("<img src='./icons/wiki.svg' alt='Show Wiki Info'/>", function (btn, map) {
         openModal("#wikiModal");
     }, "Show Wiki Info").addTo(map);
 
-    L.easyButton("<img src='./icons/news.svg'/>", function (btn, map) {
+    L.easyButton("<img src='./icons/news.svg' alt='Show Country News'/>", function (btn, map) {
         openModal("#countryNewsModal");
     }, "Show Country News").addTo(map);
 
-    L.easyButton("<img src='./icons/currency.svg'/>", function (btn, map) {
+    L.easyButton("<img src='./icons/currency.svg' alt='Show Currency Info'/>", function (btn, map) {
         openModal("#currencyModal");
         $("#currency-modalLoader").hide();
     }, "Show Currency Info").addTo(map);
@@ -558,17 +553,16 @@ function checkTime(i) {
 const poiIcons = {
     //TOURISM ICON
     tourism: L.icon({
-        iconUrl: 'https://kierathdhugga.co.uk/project1/icons/tourism.png',
+        iconUrl: './icons/tourism.png',
         iconSize: [25, 25],
     }),
     //RELIGION ICON
     religion: L.icon({
-        iconUrl: 'https://kierathdhugga.co.uk/project1/icons/religion.png',
+        iconUrl: './icons/religion.png',
         iconSize: [25, 25],
-
     }),
     airport: L.icon({
-        iconUrl: 'https://kierathdhugga.co.uk/project1/icons/airplane.png',
+        iconUrl: './icons/airplane.png',
         iconSize: [25, 25],
     }),
     //DEFAULT ICON

@@ -15,11 +15,11 @@
     <!-- Bootstrap-->
     <link rel="stylesheet" href="libs/bootstrap/bootstrap.min.css">
 
-    <link rel="apple-touch-icon" sizes="180x180" href="https://kierathdhugga.co.uk/project1/icons/favicon_io/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="https://kierathdhugga.co.uk/project1/icons/favicon_io/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="https://kierathdhugga.co.uk/project1/icons/favicon_io/favicon-16x16.png">
-    <link rel="icon" type="image/png" href="https://kierathdhugga.co.uk/project1/icons/favicon_io/favicon.ico">
-    <link rel="manifest" href="https://kierathdhugga.co.uk/project1/icons/favicon_io/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon_io/favicon-16x16.png">
+    <link rel="icon" type="image/png" href="icons/favicon_io/favicon.ico">
+    <link rel="manifest" href="icons/favicon_io/site.webmanifest">
 
     <!-- My CSS -->
     <link rel="stylesheet" href="css/map.css">
@@ -27,6 +27,7 @@
 </head>
 
 <body>
+    <header>
     <div id="selectContainer" class="d-flex justify-content-center align-items-center">
         <!--dropdown select country -->
         <!--<span id="currentTime"></span> -->
@@ -35,6 +36,8 @@
         </select>
     </div>
 
+    </header>
+    <main>
     <!--POI LOADER-->
     <div id ="mapLoader">
         <div class="loader-content">
@@ -43,17 +46,18 @@
     </div>
     <!--MAP-->
     <div id="map"></div>
+    </main>
 
     <!-- COUNTRY INFO BUTTON OPENS THIS MODAL-->
-    <div id="countryInfoModal" class="modal fade" tabindex="-1" role="dialog" data-bs-backdrop="static"
+    <div id="countryInfoModal" aria-labelledby="countryInfoModalTitle" class="modal fade" tabindex="-1" role="dialog" data-bs-backdrop="static"
         data-bs-keyboard="false">
         <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content shadow-lg rounded-lg">
                 <div class="modal-header-countryInfo modal-header text-white">
-                    <h4 class="modal-title">Country Information</h4>
+                    <h4 id="countryInfoModalTitle" class="modal-title">Country Information</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div tabindex="0" class="modal-body">
                     <div id="country-modalLoader" class="text-center">
                         <p>Loading...</p>
                     </div>
@@ -63,7 +67,7 @@
                     <table class="table table-striped">
                         <tr>
                             <td class="text-center col-1">
-                                <img src="https://kierathdhugga.co.uk/project1/icons/countryinfo/flag.svg" alt="Flag Icon" width="24" height="24" />
+                                <img src="icons/countryinfo/flag.svg" alt="Flag Icon" width="24" height="24" />
                             </td>
                             <td>Flag</td>
                             <td id="flag" class="text-end m-0">
@@ -73,7 +77,7 @@
 
                         <tr>
                             <td class="text-center col-1">
-                                <img src="https://kierathdhugga.co.uk/project1/icons/countryinfo/city.svg" alt="Capital City Icon" width="24"
+                                <img src="icons/countryinfo/city.svg" alt="Capital City Icon" width="24"
                                     height="24" />
                             </td>
                             <td>Capital city</td>
@@ -82,7 +86,7 @@
 
                         <tr>
                             <td class="text-center col-1">
-                                <img src="https://kierathdhugga.co.uk/project1/icons/countryinfo/continent.svg" alt="Contient Icon" width="24"
+                                <img src="icons/countryinfo/continent.svg" alt="Contient Icon" width="24"
                                     height="24" />
                             </td>
                             <td>Region</td>
@@ -91,7 +95,7 @@
 
                         <tr>
                             <td class="text-center col-1">
-                                <img src="https://kierathdhugga.co.uk/project1/icons/countryinfo/population.svg" alt="Population Icon" width="24"
+                                <img src="icons/countryinfo/population.svg" alt="Population Icon" width="24"
                                     height="24" />
                             </td>
                             <td>Population</td>
@@ -100,7 +104,7 @@
 
                         <tr>
                             <td class="text-center col-1">
-                                <img src="https://kierathdhugga.co.uk/project1/icons/countryinfo/time.svg" alt="Local Time Icon" width="24" height="24" />
+                                <img src="icons/countryinfo/time.svg" alt="Local Time Icon" width="24" height="24" />
                             </td>
                             <td>Local time</td>
                             <td id="countryTime" class="text-end"></td>
@@ -108,7 +112,7 @@
 
                         <tr>
                             <td class="text-center col-1">
-                                <img src="https://kierathdhugga.co.uk/project1/icons/countryinfo/area.svg" alt="Area Icon" width="24" height="24" />
+                                <img src="icons/countryinfo/area.svg" alt="Area Icon" width="24" height="24" />
                             </td>
                             <td>Area</td>
                             <td id="area" class="text-end"></td>
@@ -116,7 +120,7 @@
 
                         <tr>
                             <td class="text-center col-1">
-                                <img src="https://kierathdhugga.co.uk/project1/icons/countryinfo/language.svg" alt="Language Icon" width="24"
+                                <img src="icons/countryinfo/language.svg" alt="Language Icon" width="24"
                                     height="24" />
                             </td>
                             <td>Language</td>
@@ -134,18 +138,18 @@
     </div>
 
     <!-- WEATHER BUTTON OPENS THIS MODAL -->
-    <div id="weatherModal" class="modal fade" tabindex="-1" aria-hidden="true" role="dialog" data-bs-backdrop="static"
+    <div id="weatherModal" aria-labelledby="weatherModalTitle" class="modal fade" tabindex="-1" aria-hidden="true" role="dialog" data-bs-backdrop="static"
         data-bs-keyboard="false">
         <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content shadow-lg rounded-lg">
                 <!-- Header -->
                 <div class="modal-header-weather modal-header text-white">
-                    <h5 class="modal-title">Weather Forecast</h5>
+                    <h5 id="weatherModalTitle" class="modal-title">Weather Forecast</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <!-- Body -->
-                <div class="modal-body text-center">
+                <div tabindex="0" class="modal-body text-center">
                     <!-- Loader -->
                     <div id="weather-modalLoader" class="my-3">
                         <div class="spinner-border text-success" role="status">
@@ -187,16 +191,16 @@
     </div>
 
     <!-- WIKI BUTTON OPENS THIS MODAL-->
-    <div id="wikiModal" class="modal fade" tabindex="-1" role="dialog" data-bs-backdrop="static"
+    <div id="wikiModal" aria-labelledby="wikiModalTitle" class="modal fade" tabindex="-1" role="dialog" data-bs-backdrop="static"
         data-bs-keyboard="false">
         <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable ">
             <div class="modal-content shadow-lg rounded-lg">
                 <div class="modal-header-wiki modal-header text-white">
-                    <h4 class="modal-title">Wikipedia Summary</h4>
+                    <h4 id="wikiModalTitle" class="modal-title">Wikipedia Summary</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <div class="modal-body" id="wikiInfo">
+                <div tabindex="0" class="modal-body" id="wikiInfo">
                     <div id="wiki-modalLoader" class="text-start">
                         <p>Loading...</p>
                     </div>
@@ -218,15 +222,15 @@
     </div>
 
     <!-- COUNTRY NEWS BUTTON OPENS THIS MODAL-->
-    <div id="countryNewsModal" class="modal fade" tabindex="-1" role="dialog" data-bs-backdrop="static"
+    <div id="countryNewsModal" aria-labelledby="countryNewsModalTitle" class="modal fade" tabindex="-1" role="dialog" data-bs-backdrop="static"
         data-bs-keyboard="false">
         <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable ">
             <div class="modal-content shadow-lg rounded-lg">
                 <div class="modal-header-news modal-header text-white">
-                    <h4 class="modal-title">Breaking News</h4>
+                    <h4 id="countryNewsModalTitle" class="modal-title">Breaking News</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" id="countryNewsInfo">
+                <div tabindex="0" class="modal-body" id="countryNewsInfo">
                     <div id="newsLoader" class="text-center">
                         <p>Loading...</p>
                     </div>
@@ -241,15 +245,15 @@
     </div>
 
     <!-- CURRENCY INFO BUTTON OPENS THIS MODAL-->
-    <div id="currencyModal" class="modal fade" tabindex="-1" role="dialog" data-bs-backdrop="static"
+    <div id="currencyModal" aria-labelledby="currencyModalTitle" class="modal fade" tabindex="-1" role="dialog" data-bs-backdrop="static"
         data-bs-keyboard="false">
         <div class="modal-dialog modal-md modal-dialog-centered">
             <div class="modal-content shadow-lg rounded-lg">
                 <div class="modal-header-currency modal-header text-white">
-                    <h4 class="modal-title">Currency calculator</h4>
+                    <h4 id="currencyModalTitle" class="modal-title">Currency calculator</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body text-center" id="currencyInfo">
+                <div tabindex="0" class="modal-body text-center" id="currencyInfo">
                     <div id="currency-modalLoader" class="text-center">
                         <p>Loading...</p>
                     </div>

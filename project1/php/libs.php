@@ -2,13 +2,17 @@
 //file for functions used in php files
 
 // --------------- cURL -------------------
-function callApi($url){
+function callApi($url, $headers = []){
     // Initialize new cURL session with given URL
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); //return response as string
     curl_setopt($ch, CURLOPT_TIMEOUT, 10); //set timeout 10 seconds
     curl_setopt($ch, CURLOPT_USERAGENT, "Gazetteer/1.0 (kierath_dhugga@hotmail.co.uk)");
+
+    if(!empty($headers)){
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    }
 
     $response = curl_exec($ch); 
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE); //HTTP response
